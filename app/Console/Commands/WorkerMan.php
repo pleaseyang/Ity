@@ -88,14 +88,14 @@ class WorkerMan extends Command
     {
         // 指定websocket协议
         $gateway = new Gateway(config('app.websocket_url'));
-        $gateway->name                 = 'Gateway ' . config('app.name');
-        $gateway->count                = 1; // CPU核数
-        $gateway->lanIp                = '127.0.0.1';
-        $gateway->startPort            = 2300;
-        $gateway->pingInterval         = 30; // 心跳检测时间间隔 单位：秒。如果设置为0代表不做任何心跳检测
+        $gateway->name = 'Gateway ' . config('app.name');
+        $gateway->count = 1; // CPU核数
+        $gateway->lanIp = '127.0.0.1';
+        $gateway->startPort = 2300;
+        $gateway->pingInterval = 30; // 心跳检测时间间隔 单位：秒。如果设置为0代表不做任何心跳检测
         $gateway->pingNotResponseLimit = 0; // 客户端在pingInterval秒内有pingNotResponseLimit次未回复就断开连接
-        $gateway->pingData             = '{"type":"heart"}'; // 发给客户端的心跳数据
-        $gateway->registerAddress      = '127.0.0.1:1236';
+        $gateway->pingData = '{"type":"heart"}'; // 发给客户端的心跳数据
+        $gateway->registerAddress = '127.0.0.1:1236';
     }
 
     /**
@@ -104,11 +104,11 @@ class WorkerMan extends Command
      */
     private function startBusinessWorker()
     {
-        $worker                  = new BusinessWorker();
-        $worker->name            = 'BusinessWorker ' . config('app.name');
-        $worker->count           = 3; // CPU核数 1-3倍
+        $worker = new BusinessWorker();
+        $worker->name = 'BusinessWorker ' . config('app.name');
+        $worker->count = 3; // CPU核数 1-3倍
         $worker->registerAddress = '127.0.0.1:1236';
-        $worker->eventHandler    = Events::class;
+        $worker->eventHandler = Events::class;
     }
 
     /**
