@@ -23,6 +23,7 @@ use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 use Throwable;
+use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 
 class Handler extends ExceptionHandler
 {
@@ -119,6 +120,17 @@ class Handler extends ExceptionHandler
     }
 
     /**
+     * 令牌已过期 无法再刷新
+     *
+     * @param Throwable $exception
+     * @return bool
+     */
+    protected function isTokenExpiredException(Throwable $exception)
+    {
+        return $exception instanceof TokenExpiredException;
+    }
+
+    /**
      * @param Throwable $exception
      */
     protected function exceptionError(Throwable $exception)
@@ -126,8 +138,8 @@ class Handler extends ExceptionHandler
         if (!$this->isUnauthorizedHttpException($exception) && !$this->isValidationException($exception) &&
         !$this->isThrottleRequestsException($exception) && !$this->isNotFoundHttpException($exception) &&
         !$this->isAuthorizationException($exception) && !$this->isMethodNotAllowedHttpException($exception) &&
-        !$this->isSuspiciousOperationException($exception)  && !$this->isMaintenanceModeException($exception)
-        ) {
+        !$this->isSuspiciousOperationException($exception)  && !$this->isMaintenanceModeException($exception) &&
+        !$this->isTokenExpiredException($exception)) {
             try {
                 $log = ExceptionError::create([
                     'message' => $exception->getMessage(),
@@ -202,6 +214,12 @@ class Handler extends ExceptionHandler
         if ($this->isUnauthorizedHttpException($exception)) {
             return ResponseBuilder::asError(ApiCode::HTTP_UNAUTHORIZED)
                 ->withHttpCode(ApiCode::HTTP_UNAUTHORIZED)
+                ->withData()
+                ->build();
+        }
+        if ($this->isTokenExpiredException($exception)) {
+            return ResponseBuilder::asError(ApiCode::HTTP_TOKEN_EXPIRED)
+                ->withHttpCode(ApiCode::HTTP_TOKEN_EXPIRED)
                 ->withData()
                 ->build();
         }

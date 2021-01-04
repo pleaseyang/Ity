@@ -24,7 +24,7 @@ class LoginController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth:admin')->except('login');
+        $this->middleware('auth:admin')->except(['login', 'refresh']);
     }
 
     /**
@@ -37,6 +37,7 @@ class LoginController extends Controller
         $token = $this->guard()->refresh();
         return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
             ->withHttpCode(ApiCode::HTTP_OK)
+            ->withMessage(__('auth.refresh'))
             ->withData($this->respondWithTokenData($token))
             ->build();
     }

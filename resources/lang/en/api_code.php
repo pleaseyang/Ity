@@ -11,4 +11,6 @@ return [
     'too_many_request' => 'Too many requests.',
     'not_found' => '404',
     'method_not_allowed' => 'Method not allowed',
+    // Token has expired and can no longer be refreshed
+    'token_expired' => 'Login status has expired. Please login again',
 ];

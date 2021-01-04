@@ -11,4 +11,5 @@ return [
     'too_many_request' => '请求次数过多',
     'not_found' => '404',
     'method_not_allowed' => '方法不被允许',
+    'token_expired' => '登陆状态已过期 请重新登陆',
 ];
