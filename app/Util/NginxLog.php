@@ -87,7 +87,7 @@ class NginxLog
             ->reverse()
             ->values()
             ->map(function ($item) {
-                $ua = new UserAgent($item['user_agent']);
+                $ua = new UserAgent($item['user_agent'] ?? '');
                 $item['user_agent_info']['platform'] = $ua->platform();
                 $item['user_agent_info']['browser'] = $ua->browser();
                 $item['user_agent_info']['version'] = $ua->version();
