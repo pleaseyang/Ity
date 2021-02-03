@@ -12,7 +12,7 @@ use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Support\Facades\Auth;
 use MarcinOrlowski\ResponseBuilder\ResponseBuilder;
 use Symfony\Component\HttpFoundation\Response;
-use Tymon\JWTAuth\Exceptions\TokenInvalidException;
+use Tymon\JWTAuth\Exceptions\JWTException;
 
 class LoginController extends Controller
 {
@@ -42,7 +42,7 @@ class LoginController extends Controller
                 ->withMessage(__('auth.refresh'))
                 ->withData($this->respondWithTokenData($token))
                 ->build();
-        } catch (TokenInvalidException $exception) {
+        } catch (JWTException $exception) {
             return ResponseBuilder::asError(ApiCode::HTTP_TOKEN_EXPIRED)
                 ->withHttpCode(ApiCode::HTTP_TOKEN_EXPIRED)
                 ->withMessage($exception->getMessage())
