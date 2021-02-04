@@ -39,7 +39,6 @@ class LoginController extends Controller
             $token = $this->guard()->refresh();
             return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
                 ->withHttpCode(ApiCode::HTTP_OK)
-                ->withMessage(__('auth.refresh'))
                 ->withData($this->respondWithTokenData($token))
                 ->build();
         } catch (JWTException $exception) {
