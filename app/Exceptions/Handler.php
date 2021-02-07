@@ -54,7 +54,7 @@ class Handler extends ExceptionHandler
      * @param Throwable $exception
      * @return bool
      */
-    protected function isUnauthorizedHttpException(Throwable $exception)
+    protected function isUnauthorizedHttpException(Throwable $exception): bool
     {
         return $exception instanceof UnauthorizedHttpException ||
             $exception instanceof AuthenticationException;
@@ -66,7 +66,7 @@ class Handler extends ExceptionHandler
      * @param Throwable $exception
      * @return bool
      */
-    protected function isValidationException(Throwable $exception)
+    protected function isValidationException(Throwable $exception): bool
     {
         return $exception instanceof ValidationException;
     }
@@ -77,7 +77,7 @@ class Handler extends ExceptionHandler
      * @param Throwable $exception
      * @return bool
      */
-    protected function isAuthorizationException(Throwable $exception)
+    protected function isAuthorizationException(Throwable $exception): bool
     {
         return $exception instanceof AuthorizationException  ||
             $exception instanceof UnauthorizedException ||
@@ -90,27 +90,27 @@ class Handler extends ExceptionHandler
      * @param Throwable $exception
      * @return bool
      */
-    protected function isThrottleRequestsException(Throwable $exception)
+    protected function isThrottleRequestsException(Throwable $exception): bool
     {
         return $exception instanceof ThrottleRequestsException;
     }
 
-    protected function isNotFoundHttpException(Throwable $exception)
+    protected function isNotFoundHttpException(Throwable $exception): bool
     {
         return $exception instanceof NotFoundHttpException;
     }
 
-    protected function isMethodNotAllowedHttpException(Throwable $exception)
+    protected function isMethodNotAllowedHttpException(Throwable $exception): bool
     {
         return $exception instanceof MethodNotAllowedHttpException;
     }
 
-    protected function isSuspiciousOperationException(Throwable $exception)
+    protected function isSuspiciousOperationException(Throwable $exception): bool
     {
         return $exception instanceof SuspiciousOperationException;
     }
 
-    protected function isMaintenanceModeException(Throwable $exception)
+    protected function isMaintenanceModeException(Throwable $exception): bool
     {
         return $exception instanceof MaintenanceModeException
             || (
@@ -125,7 +125,7 @@ class Handler extends ExceptionHandler
      * @param Throwable $exception
      * @return bool
      */
-    protected function isTokenExpiredException(Throwable $exception)
+    protected function isTokenExpiredException(Throwable $exception): bool
     {
         return $exception instanceof TokenExpiredException;
     }
@@ -177,7 +177,7 @@ class Handler extends ExceptionHandler
      *
      * @return array
      */
-    protected function context()
+    protected function context(): array
     {
         return array_merge(parent::context(), [
 
@@ -187,80 +187,80 @@ class Handler extends ExceptionHandler
     /**
      * Report or log an exception.
      *
-     * @param Throwable $exception
+     * @param Throwable $e
      * @return void
      *
      * @throws Exception|Throwable
      */
-    public function report(Throwable $exception)
+    public function report(Throwable $e)
     {
-        $this->exceptionError($exception);
+        $this->exceptionError($e);
 
-        parent::report($exception);
+        parent::report($e);
     }
 
     /**
      * Render an exception into an HTTP response.
      *
      * @param Request $request
-     * @param Throwable $exception
+     * @param Throwable $e
      * @return Response
      *
      * @throws Throwable
      */
-    public function render($request, Throwable $exception)
+    public function render($request, Throwable $e): Response
     {
         App::setLocale($request->header('lang', config('app.locale')));
-        if ($this->isUnauthorizedHttpException($exception)) {
+        if ($this->isUnauthorizedHttpException($e)) {
             return ResponseBuilder::asError(ApiCode::HTTP_UNAUTHORIZED)
                 ->withHttpCode(ApiCode::HTTP_UNAUTHORIZED)
                 ->withData()
                 ->build();
         }
-        if ($this->isTokenExpiredException($exception)) {
+        if ($this->isTokenExpiredException($e)) {
             return ResponseBuilder::asError(ApiCode::HTTP_TOKEN_EXPIRED)
                 ->withHttpCode(ApiCode::HTTP_TOKEN_EXPIRED)
                 ->withData()
                 ->build();
         }
-        if ($this->isValidationException($exception)) {
+        if ($this->isValidationException($e)) {
             return ResponseBuilder::asError(ApiCode::HTTP_UNPROCESSABLE_ENTITY)
                 ->withHttpCode(ApiCode::HTTP_UNPROCESSABLE_ENTITY)
-                ->withData($exception->errors())
+                ->withData($e->errors())
                 ->build();
         }
-        if ($this->isAuthorizationException($exception)) {
+        if ($this->isAuthorizationException($e)) {
             return ResponseBuilder::asError(ApiCode::HTTP_FORBIDDEN)
                 ->withHttpCode(ApiCode::HTTP_FORBIDDEN)
                 ->withData()
                 ->build();
         }
-        if ($this->isThrottleRequestsException($exception)) {
+        if ($this->isThrottleRequestsException($e)) {
             return ResponseBuilder::asError(ApiCode::HTTP_TOO_MANY_REQUEST)
                 ->withHttpCode(ApiCode::HTTP_TOO_MANY_REQUEST)
                 ->withData()
                 ->build();
         }
-        if ($this->isNotFoundHttpException($exception)) {
+        if ($this->isNotFoundHttpException($e)) {
             return ResponseBuilder::asError(ApiCode::HTTP_NOT_FOUND)
                 ->withHttpCode(ApiCode::HTTP_NOT_FOUND)
                 ->withData()
                 ->build();
         }
-        if ($this->isMethodNotAllowedHttpException($exception)) {
+        if ($this->isMethodNotAllowedHttpException($e)) {
             return ResponseBuilder::asError(ApiCode::HTTP_METHOD_NOT_ALLOWED)
                 ->withHttpCode(ApiCode::HTTP_METHOD_NOT_ALLOWED)
                 ->withData()
                 ->build();
         }
-        if ($this->isMaintenanceModeException($exception)) {
+        if ($this->isMaintenanceModeException($e)) {
             return ResponseBuilder::asError(ApiCode::HTTP_SERVICE_UNAVAILABLE)
                 ->withHttpCode(ApiCode::HTTP_SERVICE_UNAVAILABLE)
                 ->withData()
                 ->build();
         }
         if (App::environment('local')) {
-            return parent::render($request, $exception);
+            return parent::render($request, $e);
         }
         return ResponseBuilder::asError(ApiCode::HTTP_INTERNAL_SERVER_ERROR)
             ->withHttpCode(ApiCode::HTTP_INTERNAL_SERVER_ERROR)
