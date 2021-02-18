@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Permission\Traits\HasRoles;
@@ -112,22 +113,54 @@ class Admin extends Authenticatable implements JWTSubject
      */
     public static function getList(array $validated): array
     {
-        $model = Admin::when($validated['name'] ?? null, function ($query) use ($validated) {
-            return $query->where('name', 'like', '%' . $validated['name'] . '%');
-        })
-            ->when($validated['start_at'] ?? null, function ($query) use ($validated) {
-                return $query->whereBetween('created_at', [$validated['start_at'], $validated['end_at']]);
-            });
+        $model = DB::table(function ($query) use ($validated) {
+            $query->from('admins')
+                ->groupBy('admins.id')
+                ->join('model_has_roles', function ($join) {
+                    $join->on('admins.id', '=', 'model_has_roles.model_id')
+                        ->where('model_type', '=', 'App\\Models\\Admin');
+                }, null, null, 'left')
+                ->leftJoin('roles', 'roles.id', '=', 'model_has_roles.role_id')
+                ->when($validated['name'] ?? null, function ($query) use ($validated) {
+                    return $query->where('admins.name', 'like', '%' . $validated['name'] . '%');
+                })
+                ->when($validated['email'] ?? null, function ($query) use ($validated) {
+                    return $query->where('admins.email', 'like', '%' . $validated['email'] . '%');
+                })
+                ->when(is_numeric($validated['status']), function ($query) use ($validated) {
+                    return $query->where('admins.status', '=', $validated['status']);
+                })
+                ->when($validated['start_at'] ?? null, function ($query) use ($validated) {
+                    return $query->whereBetween('admins.created_at', [$validated['start_at'], $validated['end_at']]);
+                })
+                ->when(
+                    isset($validated['role_ids']) && count($validated['role_ids']),
+                    function ($query) use ($validated) {
+                        $roleIds = implode('|', $validated['role_ids']);
+                        return $query->havingRaw("CONCAT (',',role_ids,',') REGEXP ',({$roleIds}),'");
+                    }
+                )->select([
+                    'admins.id',
+                    'admins.name',
+                    'admins.email',
+                    DB::raw(' GROUP_CONCAT(roles.id) as role_ids'),
+                    DB::raw(' GROUP_CONCAT(roles.name) as role_names'),
+                    'admins.status',
+                    'admins.created_at',
+                    'admins.updated_at',
+                ]);
+        }, 'admins');
 
         $total = $model->count('id');
 
-        $admins = $model->select(['id', 'name', 'status', 'email', 'created_at', 'updated_at'])
+        $admins = $model
             ->orderBy($validated['sort'] ?? 'created_at', $validated['order'] === 'ascending' ? 'asc' : 'desc')
             ->offset(($validated['offset'] - 1) * $validated['limit'])
             ->limit($validated['limit'])
             ->get()
             ->map(function ($admin) {
-                $admin->roles;
+                $admin->role_ids = is_string($admin->role_ids) ? explode(',', $admin->role_ids): [];
+                $admin->role_names = is_string($admin->role_names) ? explode(',', $admin->role_names): [];
                 return $admin;
             });
 

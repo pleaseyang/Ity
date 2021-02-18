@@ -4,6 +4,7 @@ namespace App\Http\Requests\Admin\Admin;
 
 use App\Http\Requests\GetListRequest as CommonRequest;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class GetListRequest extends FormRequest
 {
@@ -26,6 +27,9 @@ class GetListRequest extends FormRequest
     {
         return array_merge((new CommonRequest())->rules(), [
             'name' => ['nullable', 'string', 'between:1,60',],
+            'email' => ['nullable', 'string', 'between:1,60',],
+            'status' => ['nullable', 'integer', Rule::in(0, 1)],
+            'role_ids' => ['nullable', 'array',],
         ]);
     }
 
@@ -38,6 +42,9 @@ class GetListRequest extends FormRequest
     {
         return array_merge((new CommonRequest())->attributes(), [
             'name' => __('message.admin.name'),
+            'email' => __('validation.attributes.email'),
+            'status' => __('message.admin.status'),
+            'role_ids' => __('message.role.id'),
         ]);
     }
 }

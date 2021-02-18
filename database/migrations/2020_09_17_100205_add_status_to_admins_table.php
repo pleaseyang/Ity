@@ -14,7 +14,7 @@ class AddStatusToAdminsTable extends Migration
     public function up()
     {
         Schema::table('admins', function (Blueprint $table) {
-            $table->tinyInteger('status')->default(1)->comment('状态 1:正常 2:禁止')
+            $table->tinyInteger('status')->default(1)->comment('状态 1:正常 0:禁止')
                 ->after('name');
         });
     }
