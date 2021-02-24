@@ -135,11 +135,10 @@ class Routes
 
     /**
      * @param Admin $admin
-     * @return Routes
+     * @return void
      */
     private function setAdmin(Admin $admin)
     {
         $this->admin = $admin;
-        return $this;
     }
 }

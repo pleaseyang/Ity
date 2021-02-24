@@ -202,7 +202,7 @@ class FileSystem
      * @param string|array $paths
      * @return bool
      */
-    public function delete($paths)
+    public function delete($paths): bool
     {
         return $this->getDisk()->delete($paths);
     }
@@ -223,7 +223,7 @@ class FileSystem
     /**
      * @return string
      */
-    private function getDirectory(): string
+    public function getDirectory(): string
     {
         return $this->directory;
     }
@@ -258,7 +258,7 @@ class FileSystem
     /**
      * @return string
      */
-    private function getDiskName(): string
+    public function getDiskName(): string
     {
         return $this->diskName;
     }

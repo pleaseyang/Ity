@@ -139,11 +139,10 @@ class NginxLog
 
     /**
      * @param mixed $filePath
-     * @return NginxLog
+     * @return void
      */
     private function setFilePath($filePath)
     {
         $this->filePath = $filePath;
-        return $this;
     }
 }
