@@ -30,8 +30,8 @@ class UpdateRequest extends FormRequest
     {
         return [
             'id' => ['required', 'integer',],
-            'name' => ['required', 'string', Rule::unique('admins')->ignore($this->user), 'between:2,60'],
-            'email' => ['required', 'string', 'email', Rule::unique('admins')->ignore($this->user), 'between:2,60'],
+            'name' => ['required', 'string', Rule::unique('users')->ignore($this->user), 'between:2,60'],
+            'email' => ['required', 'string', 'email', Rule::unique('users')->ignore($this->user), 'between:2,60'],
             'password' => ['nullable', 'string', 'between:6,60'],
         ];
     }
