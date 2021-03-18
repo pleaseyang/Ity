@@ -44,7 +44,6 @@ class LoginController extends Controller
         } catch (JWTException $exception) {
             return ResponseBuilder::asError(ApiCode::HTTP_TOKEN_EXPIRED)
                 ->withHttpCode(ApiCode::HTTP_TOKEN_EXPIRED)
-                ->withMessage($exception->getMessage())
                 ->build();
         }
     }
