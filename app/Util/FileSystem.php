@@ -97,7 +97,7 @@ class FileSystem
                 'size' => $this->formatBytes($disk->size($file)),
                 'name' => $file,
                 'url' => asset('storage/' . $file),
-                'lastModified' => Carbon::parse($disk->lastModified($file))->toDateTimeString(),
+                'lastModified' => Carbon::parse($disk->lastModified($file))->toISOString(),
                 'pathinfo' => pathinfo($file)
             ];
         }
