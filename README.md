@@ -66,7 +66,8 @@ LARAVEL Notifiable Trait 搭建
 5. `composer install --optimize-autoloader --no-dev` 自动加载器改进
 6. `php artisan config:cache` 优化配置加载
 7. `php artisan route:cache` 优化路由加载
-8. `composer dump-autoload --optimize` 优化自动加载
+8. `php artisan event:cache` 优化事件加载
+9. `composer dump-autoload --optimize` 优化自动加载
 
 ### 维护
 1.  `php artisan down` 维护模式
