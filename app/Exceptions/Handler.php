@@ -56,7 +56,8 @@ class Handler extends ExceptionHandler
      */
     protected function isUnauthorizedHttpException(Throwable $exception): bool
     {
-        return $exception instanceof UnauthorizedHttpException ||
+        return $exception instanceof AuthorizationException  ||
+            $exception instanceof UnauthorizedHttpException ||
             $exception instanceof AuthenticationException;
     }
 
@@ -79,8 +80,7 @@ class Handler extends ExceptionHandler
      */
     protected function isAuthorizationException(Throwable $exception): bool
     {
-        return $exception instanceof AuthorizationException  ||
-            $exception instanceof UnauthorizedException ||
+        return $exception instanceof UnauthorizedException ||
             ($exception instanceof HttpException && $exception->getStatusCode() === ApiCode::HTTP_FORBIDDEN);
     }
 
