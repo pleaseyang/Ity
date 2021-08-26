@@ -32,9 +32,6 @@ Route::middleware(['lang'])->prefix('admin')->name('admin.')->group(function () 
     Route::post('refresh', [LoginController::class, 'refresh']);
     Route::middleware(['jwt.role:admin', 'jwt.auth'])->group(function () {
         Route::post('me', [LoginController::class, 'me']);
-        Route::post('nav', [AdminController::class, 'nav']);
-        Route::post('nav/set/noCache', [AdminController::class, 'navSetNoCache']);
-        Route::post('nav/set/affix', [AdminController::class, 'navSetAffix']);
         Route::post('notifications', [NotificationController::class, 'notifications']);
         Route::post('notification', [NotificationController::class, 'notification']);
         Route::post('notification/unReadCount', [NotificationController::class, 'unReadCount']);
@@ -43,6 +40,9 @@ Route::middleware(['lang'])->prefix('admin')->name('admin.')->group(function () 
         Route::post('notification/admins', [NotificationController::class, 'admins']);
         Route::post('notification/send', [NotificationController::class, 'send']);
         Route::middleware(['auth:admin', 'auth.status:admin'])->group(function () {
+            Route::post('nav', [AdminController::class, 'nav']);
+            Route::post('nav/set/noCache', [AdminController::class, 'navSetNoCache']);
+            Route::post('nav/set/affix', [AdminController::class, 'navSetAffix']);
             // 权限
             Route::post('permission/create', [PermissionController::class, 'create'])
                 ->middleware('permission:permission.create');
