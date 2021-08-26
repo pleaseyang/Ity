@@ -12,9 +12,12 @@ use App\Http\Response\ApiCode;
 use App\Models\Admin;
 use App\Models\Permission;
 use App\Notifications\PermissionChange;
+use App\Util\Routes;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use MarcinOrlowski\ResponseBuilder\ResponseBuilder;
+use Psr\SimpleCache\InvalidArgumentException;
 use Symfony\Component\HttpFoundation\Response;
 
 class AdminController extends Controller
@@ -191,6 +194,60 @@ class AdminController extends Controller
         return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
             ->withHttpCode(ApiCode::HTTP_OK)
             ->withData($admin)
+            ->withMessage(__('message.common.update.success'))
+            ->build();
+    }
+
+    /**
+     * @param Request $request
+     * @return Response
+     * @throws InvalidArgumentException
+     */
+    public function nav(Request $request): Response
+    {
+        /** @var Admin $admin */
+        $admin = $request->user('admin');
+        $routes = new Routes($admin);
+        $permissions = $routes->getAdmin()->getAllPermissions();
+        return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
+            ->withHttpCode(ApiCode::HTTP_OK)
+            ->withData([
+                'list' => $routes->nav($permissions)
+            ])
+            ->withMessage(__('message.common.search.success'))
+            ->build();
+    }
+
+    public function navSetNoCache(Request $request): Response
+    {
+        /** @var Admin $admin */
+        $admin = $request->user('admin');
+        $data = (array) $request->post('data');
+        $routes = new Routes($admin);
+        $data = collect($data)->mapWithKeys(function (array $array): array {
+            return [$array['name'] => $array['no_cache']];
+        });
+        Cache::forget($routes->cacheKey());
+        Cache::store('redis')->forever($routes->cacheKey(), $data);
+        return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
+            ->withHttpCode(ApiCode::HTTP_OK)
+            ->withMessage(__('message.common.update.success'))
+            ->build();
+    }
+
+    public function navSetAffix(Request $request): Response
+    {
+        /** @var Admin $admin */
+        $admin = $request->user('admin');
+        $data = (array) $request->post('data');
+        $routes = new Routes($admin);
+        $data = collect($data)->mapWithKeys(function (array $array): array {
+            return [$array['name'] => $array['affix']];
+        });
+        Cache::forget($routes->affixKey());
+        Cache::store('redis')->forever($routes->affixKey(), $data);
+        return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
+            ->withHttpCode(ApiCode::HTTP_OK)
             ->withMessage(__('message.common.update.success'))
             ->build();
     }

@@ -4,6 +4,10 @@ namespace App\Util;
 
 use App\Models\Admin;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
+use Psr\SimpleCache\InvalidArgumentException;
+use Spatie\Permission\Models\Permission;
+use Str;
 
 class Routes
 {
@@ -18,6 +22,78 @@ class Routes
         $this->setAdmin($admin);
     }
 
+    /**
+     * @param Collection $permissions
+     * @return Collection
+     * @throws InvalidArgumentException
+     */
+    public function nav(Collection $permissions): Collection
+    {
+        $permissions = $permissions
+            ->where('hidden', '=', 0)
+            ->where('component', '!=', 'layout/Layout')
+            ->where('component', '!=', 'rview')
+            ->filter(function (Permission $permission): bool {
+                return Str::startsWith($permission->path, '/');
+            })
+            ->values();
+        $noCache = $this->getNoCache($permissions);
+        $affix = $this->getAffix($permissions);
+        return $permissions->map(function (Permission $permission) use ($noCache, $affix): Permission {
+            $permission->no_cache = $noCache->get($permission->name, false);
+            $permission->affix = $affix->get($permission->name, false);
+            return $permission;
+        });
+    }
+
+    public function cacheKey(): string
+    {
+        return "PERMISSION:NOCACHE:{$this->getAdmin()->id}";
+    }
+
+    /**
+     * @param Collection $permissions
+     * @return Collection
+     * @throws InvalidArgumentException
+     */
+    private function getNoCache(Collection $permissions): Collection
+    {
+        $data = Cache::store('redis')->get($this->cacheKey(), collect());
+        if ($data->count() === 0) {
+            $data = $permissions->mapWithKeys(function (Permission $permission): array {
+                return [$permission->name => false];
+            });
+            Cache::store('redis')->forever($this->cacheKey(), $data);
+        }
+        return $data;
+    }
+
+    public function affixKey(): string
+    {
+        return "PERMISSION:AFFIX:{$this->getAdmin()->id}";
+    }
+
+    /**
+     * @param Collection $permissions
+     * @return Collection
+     * @throws InvalidArgumentException
+     */
+    private function getAffix(Collection $permissions): Collection
+    {
+        $data = Cache::store('redis')->get($this->affixKey(), collect());
+        if ($data->count() === 0) {
+            $data = $permissions->mapWithKeys(function (Permission $permission): array {
+                return [$permission->name => false];
+            });
+            Cache::store('redis')->forever($this->affixKey(), $data);
+        }
+        return $data;
+    }
+
+    /**
+     * @return Collection
+     * @throws InvalidArgumentException
+     */
     public function routes(): Collection
     {
         if ($this->getAdmin()->status === 1) {
@@ -35,9 +111,15 @@ class Routes
         ]]);
     }
 
+    /**
+     * @return Collection
+     * @throws InvalidArgumentException
+     */
     private function permissionCollect(): Collection
     {
-        $permissions = $this->getAdmin()->getAllPermissions()
+        $permissions = $this->getAdmin()->getAllPermissions();
+        $this->nav($permissions);
+        $permissions = $permissions
             ->where('guard_name', '=', 'admin')
             ->toArray();
         $collect = [];
@@ -56,9 +138,16 @@ class Routes
         return collect($permissions);
     }
 
+    /**
+     * @param Collection $permissions
+     * @return Collection
+     * @throws InvalidArgumentException
+     */
     private function formatRoutes(Collection $permissions): Collection
     {
-        return $permissions->map(function ($value) {
+        $noCache = Cache::store('redis')->get($this->cacheKey(), collect());
+        $affix = Cache::store('redis')->get($this->affixKey(), collect());
+        return $permissions->map(function ($value) use ($noCache, $affix): array {
             $info = [];
             $info['id'] = $value['id'];
             $info['pid'] = $value['pid'];
@@ -80,12 +169,12 @@ class Routes
                 'icon' => $value['icon'], // 设置该路由的图标，支持 svg-class，也支持 el-icon-x element-ui 的 icon
                 // 设置该路由进入的权限，支持多个权限叠加
                 'roles' => $roles,
-                'noCache' => true, // 如果设置为true，则不会被 <keep-alive> 缓存(默认 false)
+                'noCache' => $noCache->get($value['name'], false), // 如果设置为true，则不会被 <keep-alive> 缓存(默认 false)
                 'breadcrumb' => true, //  如果设置为false，则不会在breadcrumb面包屑中显示(默认 true)
-                'affix' => false, // 若果设置为true，它则会固定在tags-view中(默认 false)
+                'affix' => $affix->get($value['name'], false), // 若果设置为true，它则会固定在tags-view中(默认 false)
             ];
             // 当设置 true 的时候该路由不会在侧边栏出现 如401，login等页面，或者如一些编辑页面/edit/1
-            $info['hidden'] = $value['hidden'] ? true : false;
+            $info['hidden'] = (bool)$value['hidden'];
             // 当设置 noRedirect 的时候该路由在面包屑导航中不可被点击
             if ($value['component'] === 'layout/Layout' || $value['component'] === 'rview') {
                 $info['redirect'] = 'noRedirect';
@@ -113,9 +202,9 @@ class Routes
                         'title' => $value['meta']['title'],
                         'icon' => $value['meta']['icon'],
                         'roles' => $value['meta']['roles'],
-                        'noCache' => true,
-                        'breadcrumb' => true,
-                        'affix' => false,
+                        'noCache' => $value['meta']['noCache'],
+                        'breadcrumb' => $value['meta']['breadcrumb'],
+                        'affix' => $value['meta']['affix'],
                     ]
                 ];
                 unset($permissions[$key]['name']);
