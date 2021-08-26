@@ -10,6 +10,7 @@ use GuzzleHttp\Exception\InvalidArgumentException;
 use GuzzleHttp\Utils;
 use Illuminate\Support\Facades\Auth;
 use MarcinOrlowski\ResponseBuilder\ResponseBuilder;
+use Tymon\JWTAuth\Exceptions\TokenInvalidException;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Providers\Auth\Illuminate;
 use Tymon\JWTAuth\Token;
@@ -53,22 +54,31 @@ class Events
         $locale = isset($data['get']['lang']) ? $data['get']['lang'] : 'en';
         App::setLocale($locale);
         if (isset($data['get']['token'])) {
-            $token = new Token($data['get']['token']);
-            $jwt = JWTAuth::setToken($token);
-            $JWTAuth = new \Tymon\JWTAuth\JWTAuth(
-                JWTAuth::manager(),
-                new Illuminate(Auth::guard($jwt->getClaim('role'))),
-                JWTAuth::parser()
-            );
-            $info = $JWTAuth->setToken($token)->authenticate(); // info
-            Gateway::bindUser($clientId, $info);
-            $return = ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
-                ->withData([
-                    'type' => __FUNCTION__,
-                    'clientId' => $info->id
-                ])
-                ->withMessage(__('message.common.bind.success'))
-                ->build();
+            try {
+                $token = new Token($data['get']['token']);
+                $jwt = JWTAuth::setToken($token);
+                $JWTAuth = new \Tymon\JWTAuth\JWTAuth(
+                    JWTAuth::manager(),
+                    new Illuminate(Auth::guard($jwt->getClaim('role'))),
+                    JWTAuth::parser()
+                );
+                $info = $JWTAuth->setToken($token)->authenticate(); // info
+                Gateway::bindUser($clientId, $info);
+                $return = ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
+                    ->withData([
+                        'type' => __FUNCTION__,
+                        'clientId' => $info->id
+                    ])
+                    ->withMessage(__('message.common.bind.success'))
+                    ->build();
+            } catch (TokenInvalidException $tokenInvalidException) {
+                $return = ResponseBuilder::asError(ApiCode::HTTP_BAD_REQUEST)
+                    ->withData([
+                        'type' => __FUNCTION__,
+                    ])
+                    ->withMessage($tokenInvalidException->getMessage())
+                    ->build();
+            }
             Gateway::sendResponseToClient($clientId, $return);
         }
     }
@@ -90,6 +100,7 @@ class Events
             } else {
                 $return = ResponseBuilder::asError(ApiCode::HTTP_BAD_REQUEST)
                     ->withData($type)
+                    ->withMessage(__('message.common.error.json_error'))
                     ->build();
                 Gateway::sendResponseToClient($clientId, $return);
             }
