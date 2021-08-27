@@ -23,13 +23,12 @@ class Routes
     }
 
     /**
-     * @param Collection $permissions
      * @return Collection
      * @throws InvalidArgumentException
      */
-    public function nav(Collection $permissions): Collection
+    public function nav(): Collection
     {
-        $permissions = $permissions
+        $permissions = $this->getAdmin()->getAllPermissions()
             ->where('hidden', '=', 0)
             ->where('component', '!=', 'layout/Layout')
             ->where('component', '!=', 'rview')
@@ -118,7 +117,6 @@ class Routes
     private function permissionCollect(): Collection
     {
         $permissions = $this->getAdmin()->getAllPermissions();
-        $this->nav($permissions);
         $permissions = $permissions
             ->where('guard_name', '=', 'admin')
             ->toArray();

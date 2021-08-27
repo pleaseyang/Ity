@@ -208,11 +208,10 @@ class AdminController extends Controller
         /** @var Admin $admin */
         $admin = $request->user('admin');
         $routes = new Routes($admin);
-        $permissions = $routes->getAdmin()->getAllPermissions();
         return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
             ->withHttpCode(ApiCode::HTTP_OK)
             ->withData([
-                'list' => $routes->nav($permissions)
+                'list' => $routes->nav()
             ])
             ->withMessage(__('message.common.search.success'))
             ->build();
