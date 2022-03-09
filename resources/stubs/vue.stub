@@ -1,0 +1,301 @@
+<template>
+  <div class="app-container">
+    <el-row>
+      <el-col :span="24">
+        <el-form ref="formInline" :inline="true" :model="formInline">
+          <el-form-item>
+            <el-button
+              type="primary"
+              icon="el-icon-circle-plus-outline"
+              @click="createVisible = true"
+            >
+              {{ $t('common.create') }}
+            </el-button>
+          </el-form-item>
+          {{search}}
+          <el-form-item :label="$t('common.createTime')" prop="time">
+            <el-date-picker
+              v-model="formInline.time"
+              type="datetimerange"
+              :picker-options="pickerOptions"
+              range-separator="~"
+              :start-placeholder="$t('common.startTime')"
+              :end-placeholder="$t('common.endTime')"
+              align="right"
+            />
+          </el-form-item>
+          <el-col>
+            <el-form-item>
+              <el-button type="primary" @click="onSubmit">{{ $t('common.search') }}</el-button>
+              <el-button @click="resetForm('formInline')">{{ $t('common.reset') }}</el-button>
+            </el-form-item>
+          </el-col>
+        </el-form>
+      </el-col>
+      <el-col v-loading="loading" :span="24">
+        <el-col :span="24">
+          <el-table
+            highlight-current-row
+            :data="tableData"
+            style="width: 100%"
+            :default-sort="{prop: sort, order: order}"
+            @sort-change="tableSortChange"
+          >
+            {{table}}
+            <el-table-column prop="created_at" :label="$t('common.createdAt')" :formatter="rTime" sortable />
+            <el-table-column prop="updated_at" :label="$t('common.updatedAt')" :formatter="rTime" sortable />
+            <el-table-column :label="$t('common.handle')">
+              <template slot-scope="scope">
+                <el-button
+                  icon="el-icon-edit-outline"
+                  type="primary"
+                  @click="handleEdit(scope.row)"
+                >
+                  {{ $t('common.update') }}
+                </el-button>
+                <el-popconfirm
+                  :title="$t('common.confirmDelete')"
+                  :confirm-button-text="$t('common.confirmButtonText')"
+                  :cancel-button-text="$t('common.cancelButtonText')"
+                  @onConfirm="handleDelete(scope.row.id)"
+                >
+                  <el-button
+                    slot="reference"
+                    icon="el-icon-delete"
+                    type="danger"
+                  >
+                    {{ $t('common.delete') }}
+                  </el-button>
+                </el-popconfirm>
+              </template>
+            </el-table-column>
+          </el-table>
+        </el-col>
+        <el-col :span="24" class="margin-t-10">
+          <el-pagination
+            :page-sizes="[10, 25, 50]"
+            :page-size="10"
+            :current-page="offset"
+            layout="total, sizes, prev, pager, next, jumper"
+            :total="total"
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
+          />
+        </el-col>
+      </el-col>
+    </el-row>
+    <el-dialog
+      v-el-drag-dialog
+      :title="$t('common.create')"
+      :visible.sync="createVisible"
+    >
+      <el-form ref="createForm" :model="createForm" label-width="auto" @submit.native.prevent>
+        {{create}}
+        <el-form-item>
+          <el-button type="primary" :loading="createLoading" @click="onCreate('createForm')">{{ $t('common.submit') }}</el-button>
+          <el-button @click="resetCreateForm('createForm')">{{ $t('common.reset') }}</el-button>
+        </el-form-item>
+      </el-form>
+    </el-dialog>
+    <el-dialog
+      v-el-drag-dialog
+      :title="$t('common.update')"
+      :visible.sync="updateVisible"
+    >
+      <el-form ref="updateForm" :model="updateForm" label-width="auto" @submit.native.prevent>
+        {{update}}
+        <el-form-item>
+          <el-button type="primary" :loading="updateLoading" @click="onUpdate('updateForm')">{{ $t('common.submit') }}</el-button>
+        </el-form-item>
+      </el-form>
+    </el-dialog>
+  </div>
+</template>
+
+<script>
+import { rTime } from '@/utils'
+import { {{snake}}, {{singular}}, deleted, create, update } from '@/api/{{singular}}'
+
+export default {
+  name: '{{singular}}.{{snake}}',
+  data() {
+    return {
+      createForm: {
+        {{form}}
+      },
+      updateForm: {
+        {{form}}
+      },
+      formInline: {
+        {{form}},
+        time: ''
+      },
+      total: 0,
+      loading: true,
+      order: 'descending',
+      sort: 'created_at',
+      offset: 0,
+      limit: 10,
+      tableData: [],
+      pickerOptions: {
+        shortcuts: [{
+          text: this.$t('common.week'),
+          onClick(picker) {
+            const end = new Date()
+            const start = new Date()
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 7)
+            picker.$emit('pick', [start, end])
+          }
+        }, {
+          text: this.$t('common.oneMonth'),
+          onClick(picker) {
+            const end = new Date()
+            const start = new Date()
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 30)
+            picker.$emit('pick', [start, end])
+          }
+        }, {
+          text: this.$t('common.threeMonth'),
+          onClick(picker) {
+            const end = new Date()
+            const start = new Date()
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 90)
+            picker.$emit('pick', [start, end])
+          }
+        }]
+      },
+      createError: {},
+      createLoading: false,
+      createVisible: false,
+      updateError: {},
+      updateLoading: false,
+      updateVisible: false,
+      updateId: 0
+    }
+  },
+  mounted() {
+    this.getList()
+  },
+  methods: {
+    onUpdate(formName) {
+      this.updateError = {}
+      this.updateLoading = true
+      update(this.updateForm).then(response => {
+        this.$message({
+          message: response.message,
+          type: 'success'
+        })
+        this.updateVisible = false
+        this.getList()
+      }).catch(reason => {
+        const { data } = reason.response
+        if (data.code === 422) {
+          this.updateError = data.data
+        }
+      }).finally(() => {
+        this.updateLoading = false
+      })
+    },
+    onCreate(formName) {
+      this.createError = {}
+      this.createLoading = true
+      create(this.createForm).then(response => {
+        this.$message({
+          message: response.message,
+          type: 'success'
+        })
+        this.resetCreateForm(formName)
+        this.createVisible = false
+        this.offset = 0
+        this.getList()
+      }).catch(reason => {
+        const { data } = reason.response
+        if (data.code === 422) {
+          this.createError = data.data
+        }
+      }).finally(() => {
+        this.createLoading = false
+      })
+    },
+    resetCreateForm(formName) {
+      this.$refs[formName].resetFields()
+    },
+    onSubmit() {
+      this.offset = 0
+      this.getList()
+    },
+    resetForm(formName) {
+      this.$refs[formName].resetFields()
+      this.offset = 0
+      this.getList()
+    },
+    tableSortChange(column) {
+      this.order = column.order ? column.order : 'descending'
+      this.sort = column.prop
+      this.offset = 0
+      this.getList()
+    },
+    getList() {
+      this.loading = true
+      const requestData = {
+        offset: this.offset,
+        limit: this.limit,
+        order: this.order,
+        sort: this.sort
+      }
+      Object.assign(requestData, this.formInline)
+      if (rTime(this.formInline.time[0]) !== '') {
+        requestData['start_at'] = rTime(this.formInline.time[0])
+      }
+      if (rTime(this.formInline.time[1]) !== '') {
+        requestData['end_at'] = rTime(this.formInline.time[1])
+      }
+      {{snake}}(requestData).then(response => {
+        const { data } = response
+        this.loading = false
+        this.tableData = data.data
+        this.total = data.total
+      }).catch(reason => {
+        this.loading = false
+        this.tableData = []
+        this.total = 0
+      })
+    },
+    handleSizeChange(val) {
+      this.limit = val
+      this.getList()
+    },
+    handleCurrentChange(val) {
+      this.offset = val
+      this.getList()
+    },
+    rTime(row, column) {
+      return rTime(row[column.property])
+    },
+    handleDelete(id) {
+      deleted({
+        id: id
+      }).then(response => {
+        this.$message({
+          message: response.message,
+          type: 'success'
+        })
+        this.getList()
+      })
+    },
+    handleEdit(row) {
+      this.updateError = {}
+      {{singular}}({
+        id: row.id
+      }).then(response => {
+        const { data } = response
+        this.updateVisible = true
+        this.updateForm = data
+      })
+    }
+  }
+}
+</script>
+
+<style scoped>
+</style>

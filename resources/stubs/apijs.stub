@@ -1,0 +1,40 @@
+import request from '@/utils/request'
+export function {{snake}}(data) {
+  return request({
+    url: '/{{snake}}',
+    method: 'post',
+    data
+  })
+}
+
+export function {{singular}}(data) {
+  return request({
+    url: '/{{singular}}',
+    method: 'post',
+    data
+  })
+}
+
+export function create(data) {
+  return request({
+    url: '/{{singular}}/create',
+    method: 'post',
+    data
+  })
+}
+
+export function update(data) {
+  return request({
+    url: '/{{singular}}/update',
+    method: 'post',
+    data
+  })
+}
+
+export function deleted(data) {
+  return request({
+    url: '/{{singular}}/delete',
+    method: 'post',
+    data
+  })
+}

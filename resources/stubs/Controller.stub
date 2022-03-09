@@ -1,0 +1,116 @@
+<?php
+
+namespace App\Http\Controllers\{{module}};
+
+use App\Http\Controllers\Controller;
+use App\Http\Requests\{{module}}\{{model}}\GetListRequest;
+use App\Http\Requests\{{module}}\{{model}}\IdRequest;
+use App\Http\Requests\{{module}}\{{model}}\CreateRequest;
+use App\Http\Requests\{{module}}\{{model}}\UpdateRequest;
+use App\Http\Response\ApiCode;
+use App\Models\{{model}};
+use MarcinOrlowski\ResponseBuilder\ResponseBuilder;
+use Symfony\Component\HttpFoundation\Response;
+use Exception;
+
+class {{model}}Controller extends Controller
+{
+    /**
+     * 列表
+     *
+     * @param GetListRequest $request
+     * @return Response
+     */
+    public function list(GetListRequest $request): Response
+    {
+        $validated = $request->validated();
+        return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
+            ->withHttpCode(ApiCode::HTTP_OK)
+            ->withData({{model}}::getList($validated))
+            ->withMessage(__('message.common.search.success'))
+            ->build();
+    }
+
+    /**
+     * 详情
+     *
+     * @param IdRequest $request
+     * @return Response
+     */
+    public function info(IdRequest $request): Response
+    {
+        $validated = $request->validated();
+        $model = {{model}}::find($validated['id']);
+        return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
+            ->withHttpCode(ApiCode::HTTP_OK)
+            ->withData($model)
+            ->withMessage(__('message.common.search.success'))
+            ->build();
+    }
+
+    /**
+     * 添加
+     *
+     * @param CreateRequest $request
+     * @return Response
+     */
+    public function create(CreateRequest $request): Response
+    {
+        $validated = $request->validated();
+        $model = {{model}}::create($validated);
+        return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
+            ->withHttpCode(ApiCode::HTTP_OK)
+            ->withData($model)
+            ->withMessage(__('message.common.create.success'))
+            ->build();
+    }
+
+    /**
+     * 编辑
+     *
+     * @param UpdateRequest $request
+     * @return Response
+     */
+    public function update(UpdateRequest $request): Response
+    {
+        $validated = $request->validated();
+        $model = {{model}}::find($validated['id']);
+        if ($model) {
+            $model->update($validated);
+            return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
+                ->withHttpCode(ApiCode::HTTP_OK)
+                ->withData($model)
+                ->withMessage(__('message.common.update.success'))
+                ->build();
+        }
+        return ResponseBuilder::asError(ApiCode::HTTP_BAD_REQUEST)
+            ->withHttpCode(ApiCode::HTTP_BAD_REQUEST)
+            ->withMessage(__('message.common.update.fail'))
+            ->build();
+    }
+
+    /**
+     * 删除
+     *
+     * @param IdRequest $request
+     * @return Response
+     * @throws Exception
+     */
+    public function delete(IdRequest $request): Response
+    {
+        $validated = $request->validated();
+        $model = {{model}}::find($validated['id']);
+        try {
+            $model->delete();
+            return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
+                ->withHttpCode(ApiCode::HTTP_OK)
+                ->withMessage(__('message.common.delete.success'))
+                ->build();
+        } catch (Exception $e) {
+            return ResponseBuilder::asError(ApiCode::HTTP_BAD_REQUEST)
+                ->withHttpCode(ApiCode::HTTP_BAD_REQUEST)
+                ->withMessage($e->getMessage())
+                ->build();
+        }
+    }
+}

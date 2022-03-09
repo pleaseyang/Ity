@@ -40,6 +40,11 @@ return [
             'root' => storage_path('logs'),
         ],
 
+        'codes' => [
+            'driver' => 'local',
+            'root' => storage_path('codes'),
+        ],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),

@@ -1,0 +1,54 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
+use Spatie\Activitylog\Traits\LogsActivity;
+
+/**
+ * App\Models\{{model}}
+ */
+class {{model}} extends Model
+{
+    use HasFactory, LogsActivity;
+
+    protected static $logName = '{{dbName}}';
+
+    protected static $logFillable = true;
+
+    protected static $logUnguarded = true;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        {{fillable}}
+    ];
+
+    /**
+     * 列表
+     *
+     * @param array $validated
+     * @return array
+     */
+    public static function getList(array $validated): array
+    {
+        $model = {{model}}::when($validated['start_at'] ?? null, function (Builder $query) use ($validated): Builder {
+            return $query->whereBetween('{{dbName}}.created_at', [$validated['start_at'], $validated['end_at']]);
+        })->{{where}};
+        $total = $model->count('id');
+        $data = $model
+            ->orderBy($validated['sort'] ?? '{{dbName}}.created_at', $validated['order'] === 'ascending' ? 'asc' : 'desc')
+            ->offset(($validated['offset'] - 1) * $validated['limit'])
+            ->limit($validated['limit'])
+            ->get();
+        return [
+            'data' => $data,
+            'total' => $total
+        ];
+    }
+}

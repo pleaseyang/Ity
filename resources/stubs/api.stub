@@ -1,0 +1,7 @@
+<?php
+
+Route::post('{{snake}}', [App\Http\Controllers\{{module}}\{{model}}Controller::class, 'list']);
+Route::post('{{singular}}', [App\Http\Controllers\{{module}}\{{model}}Controller::class, 'info']);
+Route::post('{{singular}}/create', [App\Http\Controllers\{{module}}\{{model}}Controller::class, 'create']);
+Route::post('{{singular}}/update', [App\Http\Controllers\{{module}}\{{model}}Controller::class, 'update']);
+Route::post('{{singular}}/delete', [App\Http\Controllers\{{module}}\{{model}}Controller::class, 'delete']);
