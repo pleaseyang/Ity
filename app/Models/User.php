@@ -7,8 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
-use Tymon\JWTAuth\Contracts\JWTSubject;
+use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
 
 /**
  * App\Models\User
@@ -42,12 +43,6 @@ class User extends Authenticatable implements JWTSubject
 {
     use Notifiable, LogsActivity;
 
-    protected static $logName = 'user';
-
-    protected static $logFillable = true;
-
-    protected static $logUnguarded = true;
-
     /**
      * The attributes that are mass assignable.
      *
@@ -56,6 +51,17 @@ class User extends Authenticatable implements JWTSubject
     protected $fillable = [
         'name', 'email', 'password',
     ];
+
+    /**
+     * @return LogOptions
+     */
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('user')
+            ->logFillable()
+            ->logUnguarded();
+    }
 
     /**
      * The attributes that should be hidden for arrays.

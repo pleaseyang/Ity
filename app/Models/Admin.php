@@ -8,9 +8,10 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Permission\Traits\HasRoles;
-use Tymon\JWTAuth\Contracts\JWTSubject;
+use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
 
 /**
  * App\Models\Admin
@@ -52,12 +53,6 @@ class Admin extends Authenticatable implements JWTSubject
 {
     use Notifiable, HasRoles, LogsActivity;
 
-    protected static $logName = 'admin';
-
-    protected static $logFillable = true;
-
-    protected static $logUnguarded = true;
-
     /**
      * The attributes that are mass assignable.
      *
@@ -66,6 +61,17 @@ class Admin extends Authenticatable implements JWTSubject
     protected $fillable = [
         'name', 'email', 'password', 'status'
     ];
+
+    /**
+     * @return LogOptions
+     */
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('admin')
+            ->logFillable()
+            ->logUnguarded();
+    }
 
     /**
      * The attributes that should be hidden for arrays.
@@ -90,7 +96,7 @@ class Admin extends Authenticatable implements JWTSubject
      *
      * @return mixed
      */
-    public function getJWTIdentifier()
+    public function getJWTIdentifier(): mixed
     {
         return $this->getKey();
     }
@@ -100,7 +106,7 @@ class Admin extends Authenticatable implements JWTSubject
      *
      * @return array
      */
-    public function getJWTCustomClaims()
+    public function getJWTCustomClaims(): array
     {
         return ['role' => 'admin'];
     }
@@ -176,7 +182,7 @@ class Admin extends Authenticatable implements JWTSubject
      * @param array $attributes
      * @return Builder|Model
      */
-    public static function create(array $attributes)
+    public static function create(array $attributes): Model|Builder
     {
         $attributes['password'] = Hash::make($attributes['password']);
         return static::query()->create($attributes);

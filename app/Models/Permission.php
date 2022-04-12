@@ -4,6 +4,7 @@
 namespace App\Models;
 
 use App\Util\Arr;
+use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Permission\Exceptions\PermissionDoesNotExist;
 
@@ -53,9 +54,15 @@ class Permission extends \Spatie\Permission\Models\Permission
 {
     use LogsActivity;
 
-    protected static $logName = 'permission';
-
-    protected static $logUnguarded = true;
+    /**
+     * @return LogOptions
+     */
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('permission')
+            ->logUnguarded();
+    }
 
     /**
      * 获取列表
