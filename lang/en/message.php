@@ -81,7 +81,8 @@ return [
     'file' => [
         'file' => 'File',
         'name' => 'File Name',
-        'directory' => 'Directory path'
+        'directory' => 'Directory path',
+        'not_found' => 'File Not Found'
     ],
     'notification' => [
         'message' => 'message',

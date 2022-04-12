@@ -3,6 +3,7 @@
 namespace App\Models;
 
 
+use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 /**
@@ -34,9 +35,15 @@ class Role extends \Spatie\Permission\Models\Role
 {
     use LogsActivity;
 
-    protected static $logName = 'role';
-
-    protected static $logUnguarded = true;
+    /**
+     * @return LogOptions
+     */
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('role')
+            ->logUnguarded();
+    }
 
     /**
      * 获取列表

@@ -9,7 +9,6 @@ use App\Http\Requests\Admin\ExceptionError\GetListRequest;
 use App\Http\Response\ApiCode;
 use App\Models\ExceptionError;
 use App\Util\FileSystem;
-use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use MarcinOrlowski\ResponseBuilder\ResponseBuilder;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -74,22 +73,21 @@ class ExceptionErrorController extends Controller
      */
     public function file(FileRequest $request): Response
     {
-        try {
-            $validated = $request->validated();
-            $fileSystem = new FileSystem('/', 'logs');
-            $contents = $fileSystem->getDisk()->get($validated['file']);
-            return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
-                ->withHttpCode(ApiCode::HTTP_OK)
-                ->withData([
-                    'file' => $contents
-                ])
-                ->withMessage(__('message.common.search.success'))
-                ->build();
-        } catch (FileNotFoundException $exception) {
+        $validated = $request->validated();
+        $fileSystem = new FileSystem('/', 'logs');
+        $contents = $fileSystem->getDisk()->get($validated['file']);
+        if ($contents === null) {
             return ResponseBuilder::asError(ApiCode::HTTP_BAD_REQUEST)
                 ->withHttpCode(ApiCode::HTTP_BAD_REQUEST)
-                ->withMessage($exception->getPrevious()->getMessage())
+                ->withMessage(__('message.file.not_found'))
                 ->build();
         }
+        return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
+            ->withHttpCode(ApiCode::HTTP_OK)
+            ->withData([
+                'file' => $contents
+            ])
+            ->withMessage(__('message.common.search.success'))
+            ->build();
     }
 }

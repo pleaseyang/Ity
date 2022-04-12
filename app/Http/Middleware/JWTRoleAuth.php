@@ -5,8 +5,8 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
-use Tymon\JWTAuth\Exceptions\JWTException;
-use Tymon\JWTAuth\Http\Middleware\BaseMiddleware;
+use PHPOpenSourceSaver\JWTAuth\Exceptions\JWTException;
+use PHPOpenSourceSaver\JWTAuth\Http\Middleware\BaseMiddleware;
 
 class JWTRoleAuth extends BaseMiddleware
 {

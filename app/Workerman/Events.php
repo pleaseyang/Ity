@@ -10,10 +10,10 @@ use GuzzleHttp\Exception\InvalidArgumentException;
 use GuzzleHttp\Utils;
 use Illuminate\Support\Facades\Auth;
 use MarcinOrlowski\ResponseBuilder\ResponseBuilder;
-use Tymon\JWTAuth\Exceptions\TokenInvalidException;
-use Tymon\JWTAuth\Facades\JWTAuth;
-use Tymon\JWTAuth\Providers\Auth\Illuminate;
-use Tymon\JWTAuth\Token;
+use PHPOpenSourceSaver\JWTAuth\Exceptions\TokenInvalidException;
+use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
+use PHPOpenSourceSaver\JWTAuth\Providers\Auth\Illuminate;
+use PHPOpenSourceSaver\JWTAuth\Token;
 
 class Events
 {
@@ -57,7 +57,7 @@ class Events
             try {
                 $token = new Token($data['get']['token']);
                 $jwt = JWTAuth::setToken($token);
-                $JWTAuth = new \Tymon\JWTAuth\JWTAuth(
+                $JWTAuth = new \PHPOpenSourceSaver\JWTAuth\JWTAuth(
                     JWTAuth::manager(),
                     new Illuminate(Auth::guard($jwt->getClaim('role'))),
                     JWTAuth::parser()

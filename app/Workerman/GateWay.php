@@ -10,7 +10,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
-use Tymon\JWTAuth\Contracts\JWTSubject;
+use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
 
 class GateWay extends LibGateWay
 {
