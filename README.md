@@ -83,8 +83,8 @@ LARAVEL Notifiable Trait 搭建
 3. URI: `ws://IP:2346?lang=LANG&token=TOKEN`
 4. SEND: `{"route": "route.name", "data": data}`
 
-### 备注
-master :laravel版本的最新分支. 其余以laravel版本号进行命名
+## 备注
+master :laravel最新版本的分支. 其余以laravel版本号进行命名
 
 ## 致谢
 * [jetbrains](https://www.jetbrains.com) ![](.github/jetbrains.svg)
