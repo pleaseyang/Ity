@@ -12,11 +12,12 @@ use Illuminate\Support\Str;
 
 class NginxLog
 {
-    private $filePath;
+    private mixed $filePath;
 
     /**
      * NginxLog constructor.
      * @param $filePath
+     * @throws FileNotFoundException
      */
     public function __construct($filePath)
     {
@@ -25,7 +26,6 @@ class NginxLog
 
     /**
      * @return Collection
-     * @throws FileNotFoundException
      */
     public function get(): Collection
     {
@@ -54,7 +54,7 @@ class NginxLog
                                 $array['method'] = $method;
                                 $array['uri'] = $uri;
                                 $array['http'] = $http;
-                            } catch (ErrorException $errorException) {
+                            } catch (ErrorException) {
                                 $array['method'] = $keyword;
                                 $array['uri'] = $keyword;
                                 $array['http'] = $keyword;
@@ -65,7 +65,7 @@ class NginxLog
                                 list($httpCode, $size) = explode(' ', trim($keyword));
                                 $array['http_code'] = $httpCode;
                                 $array['size'] = $size;
-                            } catch (ErrorException $errorException) {
+                            } catch (ErrorException) {
                                 $array['http_code'] = 'UnKnow';
                                 $array['size'] = 'UnKnow';
                             }
@@ -81,8 +81,7 @@ class NginxLog
                     }
                 }
                 $array['string'] = $item;
-                $array = array_filter($array);
-                return $array;
+                return array_filter($array);
             })
             ->reverse()
             ->values()
@@ -112,7 +111,6 @@ class NginxLog
 
     /**
      * @return Collection
-     * @throws FileNotFoundException
      */
     public function first(): Collection
     {
@@ -122,7 +120,6 @@ class NginxLog
     /**
      * @param int $key
      * @return Collection
-     * @throws FileNotFoundException
      */
     public function find(int $key): Collection
     {
@@ -132,7 +129,7 @@ class NginxLog
     /**
      * @return mixed
      */
-    public function getFilePath()
+    public function getFilePath(): mixed
     {
         return $this->filePath;
     }
@@ -140,9 +137,13 @@ class NginxLog
     /**
      * @param mixed $filePath
      * @return void
+     * @throws FileNotFoundException
      */
-    private function setFilePath($filePath)
+    private function setFilePath(mixed $filePath)
     {
+        if (Storage::disk('logs')->get($filePath) === null) {
+            throw new FileNotFoundException(__('message.file.not_found'));
+        }
         $this->filePath = $filePath;
     }
 }

@@ -81,7 +81,8 @@ return [
     'file' => [
         'file' => '文件',
         'name' => '文件名',
-        'directory' => '文件夹路径'
+        'directory' => '文件夹路径',
+        'not_found' => '文件不存在'
     ],
     'notification' => [
         'message' => '信息',
