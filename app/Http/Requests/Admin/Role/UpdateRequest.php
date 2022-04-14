@@ -2,27 +2,18 @@
 
 namespace App\Http\Requests\Admin\Role;
 
-use App\Models\Role;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use Spatie\Permission\Exceptions\RoleDoesNotExist;
 
 class UpdateRequest extends FormRequest
 {
-    public $role;
-
     /**
      * Determine if the user is authorized to make this request.
      *
      * @return bool
      */
-    public function authorize()
+    public function authorize(): bool
     {
-        try {
-            $this->role = Role::find($this->post('id', 0));
-        } catch (RoleDoesNotExist $exception) {
-            return false;
-        }
         return true;
     }
 
@@ -31,12 +22,13 @@ class UpdateRequest extends FormRequest
      *
      * @return array
      */
-    public function rules()
+    public function rules(): array
     {
+        $id = $this->post('id', 0);
         $tableNames = config('permission.table_names');
         return [
             'id' => ['required', 'integer',],
-            'name' => ['required', 'string', 'between:2,60', Rule::unique($tableNames['roles'])->ignore($this->role),],
+            'name' => ['required', 'string', 'between:2,60', Rule::unique($tableNames['roles'])->ignore($id),],
             'guard_name' => ['required', 'string', 'between:2,60', Rule::in(['api', 'admin']),],
         ];
     }
@@ -46,7 +38,7 @@ class UpdateRequest extends FormRequest
      *
      * @return array
      */
-    public function attributes()
+    public function attributes(): array
     {
         return [
             'name' => __('message.role.name'),
@@ -59,7 +51,7 @@ class UpdateRequest extends FormRequest
      *
      * @return array
      */
-    public function messages()
+    public function messages(): array
     {
         return [
 

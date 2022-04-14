@@ -98,10 +98,10 @@ class AdminController extends Controller
     {
         $validated = $request->validated();
         $resultData = Admin::updateSave($validated);
-        if ($resultData['result']) {
+        if ($resultData->isStatus()) {
             return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
                 ->withHttpCode(ApiCode::HTTP_OK)
-                ->withData($resultData['admin'])
+                ->withData($resultData->getData('admin'))
                 ->withMessage(__('message.common.update.success'))
                 ->build();
         }
@@ -148,7 +148,9 @@ class AdminController extends Controller
     public function updateSelf(UpdateSelfRequest $request): Response
     {
         $validated = $request->validated();
-        $validated['id'] = $request->user('admin')->id;
+        /* @var Admin $admin */
+        $admin = $request->user('admin');
+        $validated['id'] = $admin->id;
         // 可删除
         if ($validated['id'] === 8) {
             return ResponseBuilder::asError(ApiCode::HTTP_BAD_REQUEST)
@@ -157,10 +159,10 @@ class AdminController extends Controller
                 ->build();
         }
         $resultData = Admin::updateSave($validated);
-        if ($resultData['result']) {
+        if ($resultData->isStatus()) {
             return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
                 ->withHttpCode(ApiCode::HTTP_OK)
-                ->withData($resultData['admin'])
+                ->withData($resultData->getData('admin'))
                 ->withMessage(__('message.common.update.success'))
                 ->build();
         }
@@ -221,7 +223,7 @@ class AdminController extends Controller
     {
         /** @var Admin $admin */
         $admin = $request->user('admin');
-        $data = (array) $request->post('data');
+        $data = (array)$request->post('data');
         $routes = new Routes($admin);
         $data = collect($data)->mapWithKeys(function (array $array): array {
             return [$array['name'] => $array['no_cache']];
@@ -238,7 +240,7 @@ class AdminController extends Controller
     {
         /** @var Admin $admin */
         $admin = $request->user('admin');
-        $data = (array) $request->post('data');
+        $data = (array)$request->post('data');
         $routes = new Routes($admin);
         $data = collect($data)->mapWithKeys(function (array $array): array {
             return [$array['name'] => $array['affix']];

@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\Response as HttpResponse;
 class WebSocketController extends Controller implements WebSocket
 {
 
-    public $clientId;
+    public ?string $clientId;
 
     /**
      * WebSocket constructor.

@@ -38,9 +38,10 @@ class ExceptionErrorController extends Controller
      */
     public function amended(AmendedRequest $request): Response
     {
+        $admin = $request->user('admin');
         $validated = $request->validated();
         $exception = ExceptionError::find($validated['id']);
-        $exception->solve();
+        $exception->solve($admin);
         return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
             ->withHttpCode(ApiCode::HTTP_OK)
             ->withData($exception)

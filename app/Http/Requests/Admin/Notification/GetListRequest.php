@@ -13,7 +13,7 @@ class GetListRequest extends FormRequest
      *
      * @return bool
      */
-    public function authorize()
+    public function authorize(): bool
     {
         return true;
     }
@@ -23,7 +23,7 @@ class GetListRequest extends FormRequest
      *
      * @return array
      */
-    public function rules()
+    public function rules(): array
     {
         return array_merge((new CommonRequest())->rules(), [
             'message' => ['nullable', 'string',],
@@ -36,7 +36,7 @@ class GetListRequest extends FormRequest
      *
      * @return array
      */
-    public function attributes()
+    public function attributes(): array
     {
         return array_merge((new CommonRequest())->attributes(), [
             'message' => __('message.notification.message'),

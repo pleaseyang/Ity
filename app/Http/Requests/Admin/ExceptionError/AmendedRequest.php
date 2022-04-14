@@ -11,7 +11,7 @@ class AmendedRequest extends FormRequest
      *
      * @return bool
      */
-    public function authorize()
+    public function authorize(): bool
     {
         return true;
     }
@@ -21,7 +21,7 @@ class AmendedRequest extends FormRequest
      *
      * @return array
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             'id' => ['required', 'string', 'exists:exception_errors',],
@@ -34,7 +34,7 @@ class AmendedRequest extends FormRequest
      *
      * @return array
      */
-    public function attributes()
+    public function attributes(): array
     {
         return [
             'id' => __('message.exception.id'),

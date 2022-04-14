@@ -16,7 +16,7 @@ class ContinuousCharacter implements Rule
     /**
      * @var string
      */
-    private $str;
+    private string $str;
 
     /**
      * Create a new rule instance.
@@ -35,7 +35,7 @@ class ContinuousCharacter implements Rule
      * @param mixed $value
      * @return bool
      */
-    public function passes($attribute, $value)
+    public function passes($attribute, $value): bool
     {
         return !preg_match("/{$this->str}{2}/", $value);
     }
@@ -45,7 +45,7 @@ class ContinuousCharacter implements Rule
      *
      * @return string
      */
-    public function message()
+    public function message(): string
     {
         return trans('validation.continuous_character', ['values' => $this->str]);
     }

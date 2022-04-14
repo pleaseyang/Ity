@@ -34,7 +34,7 @@ class PermissionController extends Controller
                 ->withData($permission)
                 ->withMessage(__('message.common.search.success'))
                 ->build();
-        } catch (PermissionDoesNotExist $exception) {
+        } catch (PermissionDoesNotExist) {
             return ResponseBuilder::asError(ApiCode::HTTP_BAD_REQUEST)
                 ->withHttpCode(ApiCode::HTTP_BAD_REQUEST)
                 ->withMessage(__('message.common.search.fail'))
@@ -154,16 +154,16 @@ class PermissionController extends Controller
     {
         $id = $request->post('id', 0);
         $response = Permission::__deleted($id);
-        if ($response['result']) {
+        if ($response->isStatus()) {
             return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
                 ->withHttpCode(ApiCode::HTTP_OK)
-                ->withMessage($response['message'])
+                ->withMessage($response->getMessage())
                 ->build();
         }
 
         return ResponseBuilder::asError(ApiCode::HTTP_BAD_REQUEST)
             ->withHttpCode(ApiCode::HTTP_BAD_REQUEST)
-            ->withMessage($response['message'])
+            ->withMessage($response->getMessage())
             ->build();
     }
 }

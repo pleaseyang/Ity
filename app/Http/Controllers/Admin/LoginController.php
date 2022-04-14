@@ -11,9 +11,9 @@ use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Support\Facades\Auth;
 use MarcinOrlowski\ResponseBuilder\ResponseBuilder;
+use PHPOpenSourceSaver\JWTAuth\Exceptions\JWTException;
 use Psr\SimpleCache\InvalidArgumentException;
 use Symfony\Component\HttpFoundation\Response;
-use PHPOpenSourceSaver\JWTAuth\Exceptions\JWTException;
 
 class LoginController extends Controller
 {

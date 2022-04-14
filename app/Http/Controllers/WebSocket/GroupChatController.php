@@ -75,8 +75,7 @@ class GroupChatController extends WebSocketController
                 ->withMessage(__('message.common.search.success'))
                 ->build();
             GateWay::sendResponseToAll($response);
-        } catch (Exception $e) {
-        } catch (InvalidArgumentException $e) {
+        } catch (Exception | InvalidArgumentException) {
         }
     }
 }

@@ -12,7 +12,7 @@ class AllRolesRequest extends FormRequest
      *
      * @return bool
      */
-    public function authorize()
+    public function authorize(): bool
     {
         return true;
     }
@@ -22,7 +22,7 @@ class AllRolesRequest extends FormRequest
      *
      * @return array
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             'guard_name' => ['required', 'string', Rule::in(['api', 'admin']),]
@@ -34,7 +34,7 @@ class AllRolesRequest extends FormRequest
      *
      * @return array
      */
-    public function attributes()
+    public function attributes(): array
     {
         return [
             'guard_name' => __('message.permission.guard_name'),

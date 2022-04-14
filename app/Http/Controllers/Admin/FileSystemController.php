@@ -9,6 +9,7 @@ use App\Http\Requests\Admin\FileSystem\FileRequest;
 use App\Http\Requests\Admin\FileSystem\UploadRequest;
 use App\Http\Response\ApiCode;
 use App\Util\FileSystem;
+use Exception;
 use Illuminate\Http\Request;
 use LogicException;
 use MarcinOrlowski\ResponseBuilder\ResponseBuilder;
@@ -141,17 +142,24 @@ class FileSystemController extends Controller
      * 下载文件(流)
      *
      * @param FileRequest $request
-     * @return mixed|Response
+     * @return Response
      */
-    public function download(FileRequest $request)
+    public function download(FileRequest $request): Response
     {
         $validated = $request->validated();
         $fileSystem = new FileSystem('');
-        activity()
-            ->useLog('file')
-            ->causedBy($request->user())
-            ->log(':causer.name 下载了文件 ' . $validated['file']);
-        return $fileSystem->download($validated['file']);
+        try {
+            activity()
+                ->useLog('file')
+                ->causedBy($request->user())
+                ->log(':causer.name 下载了文件 ' . $validated['file']);
+            return $fileSystem->download($validated['file']);
+        } catch (Exception $exception) {
+            return ResponseBuilder::asError(ApiCode::HTTP_BAD_REQUEST)
+                ->withHttpCode(ApiCode::HTTP_BAD_REQUEST)
+                ->withMessage($exception->getMessage())
+                ->build();
+        }
     }
 
     /**

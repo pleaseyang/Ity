@@ -3,6 +3,7 @@
 namespace App\Models;
 
 
+use Illuminate\Database\Eloquent\Builder;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -56,10 +57,10 @@ class Role extends \Spatie\Permission\Models\Role
         $where[] = ['guard_name', '=', $validated['guard_name']];
 
         $model = Role::where($where)
-            ->when($validated['name'] ?? null, function ($query) use ($validated) {
+            ->when($validated['name'] ?? null, function (Builder $query) use ($validated): Builder {
                 return $query->where('name', 'like', '%' . $validated['name'] . '%');
             })
-            ->when($validated['start_at'] ?? null, function ($query) use ($validated) {
+            ->when($validated['start_at'] ?? null, function (Builder $query) use ($validated): Builder {
                 return $query->whereBetween('created_at', [$validated['start_at'], $validated['end_at']]);
             });
 

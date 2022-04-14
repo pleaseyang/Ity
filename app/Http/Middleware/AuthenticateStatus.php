@@ -5,16 +5,17 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Auth\Factory as Auth;
+use Illuminate\Http\Request;
 
 class AuthenticateStatus
 {
 
     /**
-     * The authentication factory instance.
+     * The authentication factory instance
      *
      * @var \Illuminate\Contracts\Auth\Factory
      */
-    protected $auth;
+    protected Auth $auth;
 
     /**
      * Create a new middleware instance.
@@ -30,13 +31,13 @@ class AuthenticateStatus
     /**
      * Handle an incoming request.
      *
-     * @param \Illuminate\Http\Request $request
-     * @param \Closure $next
+     * @param Request $request
+     * @param Closure $next
      * @param string $guard
      * @return mixed
      * @throws AuthorizationException
      */
-    public function handle($request, Closure $next, string $guard)
+    public function handle(Request $request, Closure $next, string $guard)
     {
         if ($this->auth->guard($guard)->user()->status !== 1) {
             throw new AuthorizationException;

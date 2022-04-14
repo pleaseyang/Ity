@@ -5,20 +5,21 @@ namespace App\Notifications;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Collection;
 
 class RoleChange extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    public $data;
+    public Collection $data;
 
     /**
      * Create a new notification instance.
      *
-     * @param  mixed  $data
+     * @param Collection $data
      * @return void
      */
-    public function __construct($data)
+    public function __construct(Collection $data)
     {
         $this->data = $data;
     }
@@ -26,10 +27,10 @@ class RoleChange extends Notification implements ShouldQueue
     /**
      * Get the notification's delivery channels.
      *
-     * @param  mixed  $notifiable
+     * @param mixed $notifiable
      * @return array
      */
-    public function via($notifiable)
+    public function via($notifiable): array
     {
         return ['database'];
     }
@@ -39,7 +40,7 @@ class RoleChange extends Notification implements ShouldQueue
      *
      * @return array
      */
-    public function viaQueues()
+    public function viaQueues(): array
     {
         return [
             'database' => 'notification',
@@ -49,10 +50,10 @@ class RoleChange extends Notification implements ShouldQueue
     /**
      * Get the array representation of the notification.
      *
-     * @param  mixed  $notifiable
+     * @param mixed $notifiable
      * @return array
      */
-    public function toArray($notifiable)
+    public function toArray($notifiable): array
     {
         return [
             'form' => 'system',

@@ -2,14 +2,15 @@
 
 namespace App\Models;
 
+use App\Util\FunctionReturn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Hash;
+use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
-use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
 
 /**
  * App\Models\User
@@ -86,7 +87,7 @@ class User extends Authenticatable implements JWTSubject
      *
      * @return mixed
      */
-    public function getJWTIdentifier()
+    public function getJWTIdentifier(): mixed
     {
         return $this->getKey();
     }
@@ -96,7 +97,7 @@ class User extends Authenticatable implements JWTSubject
      *
      * @return array
      */
-    public function getJWTCustomClaims()
+    public function getJWTCustomClaims(): array
     {
         return ['role' => 'user'];
     }
@@ -109,10 +110,10 @@ class User extends Authenticatable implements JWTSubject
      */
     public static function getList(array $validated): array
     {
-        $model = User::when($validated['name'] ?? null, function ($query) use ($validated) {
+        $model = User::when($validated['name'] ?? null, function (Builder $query) use ($validated): Builder {
             return $query->where('name', 'like', '%' . $validated['name'] . '%');
         })
-            ->when($validated['start_at'] ?? null, function ($query) use ($validated) {
+            ->when($validated['start_at'] ?? null, function (Builder $query) use ($validated): Builder {
                 return $query->whereBetween('created_at', [$validated['start_at'], $validated['end_at']]);
             });
 
@@ -134,9 +135,9 @@ class User extends Authenticatable implements JWTSubject
      * 创建
      *
      * @param array $attributes
-     * @return Builder|Model
+     * @return User
      */
-    public static function create(array $attributes)
+    public static function create(array $attributes): User
     {
         $attributes['password'] = Hash::make($attributes['password']);
         return static::query()->create($attributes);
@@ -148,7 +149,7 @@ class User extends Authenticatable implements JWTSubject
      * @param array $data
      * @return array
      */
-    public static function updateSave(array $data)
+    public static function updateSave(array $data): FunctionReturn
     {
         if (isset($data['password'])) {
             $data['password'] = Hash::make($data['password']);
@@ -157,9 +158,8 @@ class User extends Authenticatable implements JWTSubject
         $user = User::find($data['id']);
         unset($data['id']);
 
-        return [
-            'result' => $user->update($data),
-            'user' => $user
-        ];
+        return new FunctionReturn($user->update($data), '', [
+           'user' => $user
+        ]);
     }
 }

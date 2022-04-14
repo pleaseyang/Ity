@@ -8,14 +8,12 @@ use Illuminate\Validation\Rule;
 
 class UpdateSelfRequest extends FormRequest
 {
-    public $admin;
-
     /**
      * Determine if the user is authorized to make this request.
      *
      * @return bool
      */
-    public function authorize()
+    public function authorize(): bool
     {
         return true;
     }
@@ -25,14 +23,16 @@ class UpdateSelfRequest extends FormRequest
      *
      * @return array
      */
-    public function rules()
+    public function rules(): array
     {
+        /* @var Admin $admin */
+        $admin = $this->user('admin');
         return [
             'name' => [
-                'required', 'string', Rule::unique('admins')->ignore($this->user('admin')), 'between:2,60'
+                'required', 'string', Rule::unique('admins')->ignore($admin), 'between:2,60'
             ],
             'email' => [
-                'required', 'string', 'email', Rule::unique('admins')->ignore($this->user('admin')), 'between:2,60'
+                'required', 'string', 'email', Rule::unique('admins')->ignore($admin), 'between:2,60'
             ],
             'password' => ['nullable', 'string', 'between:6,60'],
         ];
@@ -43,7 +43,7 @@ class UpdateSelfRequest extends FormRequest
      *
      * @return array
      */
-    public function attributes()
+    public function attributes(): array
     {
         return [
             'id' => __('message.admin.id'),
@@ -58,7 +58,7 @@ class UpdateSelfRequest extends FormRequest
      *
      * @return array
      */
-    public function messages()
+    public function messages(): array
     {
         return [
 

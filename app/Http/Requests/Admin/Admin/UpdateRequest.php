@@ -2,23 +2,19 @@
 
 namespace App\Http\Requests\Admin\Admin;
 
-use App\Models\Admin;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 class UpdateRequest extends FormRequest
 {
-    public $admin;
-
     /**
      * Determine if the user is authorized to make this request.
      *
      * @return bool
      */
-    public function authorize()
+    public function authorize(): bool
     {
-        $this->admin = Admin::find($this->post('id', 0));
-        return $this->admin ? true : false;
+        return true;
     }
 
     /**
@@ -26,12 +22,13 @@ class UpdateRequest extends FormRequest
      *
      * @return array
      */
-    public function rules()
+    public function rules(): array
     {
+        $id = $this->post('id', 0);
         return [
-            'id' => ['required', 'integer',],
-            'name' => ['required', 'string', Rule::unique('admins')->ignore($this->admin), 'between:2,60'],
-            'email' => ['required', 'string', 'email', Rule::unique('admins')->ignore($this->admin), 'between:2,60'],
+            'id' => ['required', 'integer', Rule::exists('admins'),],
+            'name' => ['required', 'string', Rule::unique('admins')->ignore($id), 'between:2,60'],
+            'email' => ['required', 'string', 'email', Rule::unique('admins')->ignore($id), 'between:2,60'],
             'password' => ['nullable', 'string', 'between:6,60'],
             'status' => ['required', 'integer', Rule::in([0, 1])],
         ];
@@ -42,7 +39,7 @@ class UpdateRequest extends FormRequest
      *
      * @return array
      */
-    public function attributes()
+    public function attributes(): array
     {
         return [
             'id' => __('message.admin.id'),
@@ -58,7 +55,7 @@ class UpdateRequest extends FormRequest
      *
      * @return array
      */
-    public function messages()
+    public function messages(): array
     {
         return [
 

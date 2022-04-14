@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Admin\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class SyncPermissionsRequest extends FormRequest
 {
@@ -11,7 +12,7 @@ class SyncPermissionsRequest extends FormRequest
      *
      * @return bool
      */
-    public function authorize()
+    public function authorize(): bool
     {
         return true;
     }
@@ -21,10 +22,10 @@ class SyncPermissionsRequest extends FormRequest
      *
      * @return array
      */
-    public function rules()
+    public function rules(): array
     {
         return [
-            'id' => ['required', 'integer', 'exists:admins'],
+            'id' => ['required', 'integer', Rule::exists('admins')],
             'permissions' => ['array']
         ];
     }
@@ -34,7 +35,7 @@ class SyncPermissionsRequest extends FormRequest
      *
      * @return array
      */
-    public function attributes()
+    public function attributes(): array
     {
         return [
             'id' => __('message.admin.id'),
@@ -47,7 +48,7 @@ class SyncPermissionsRequest extends FormRequest
      *
      * @return array
      */
-    public function messages()
+    public function messages(): array
     {
         return [
 
