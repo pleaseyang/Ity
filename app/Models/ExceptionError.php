@@ -4,9 +4,9 @@ namespace App\Models;
 
 use Carbon\Carbon;
 use GuzzleHttp\Utils;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 /**
@@ -81,7 +81,7 @@ class ExceptionError extends Model
     {
         parent::boot();
 
-        ExceptionError::creating(function ($model) {
+        ExceptionError::creating(function (ExceptionError $model): void {
             $model->setId();
         });
     }
@@ -102,9 +102,9 @@ class ExceptionError extends Model
     /**
      * Json转数组
      * @param $value
-     * @return mixed
+     * @return string|int|bool|array|object|float|null
      */
-    public function getTraceAttribute($value)
+    public function getTraceAttribute($value): string|int|bool|array|null|object|float
     {
         return Utils::jsonDecode($value, true);
     }
@@ -147,13 +147,13 @@ class ExceptionError extends Model
         }
 
         $model = ExceptionError::where($where)
-            ->when($validated['id'] ?? null, function ($query) use ($validated) {
+            ->when($validated['id'] ?? null, function (Builder $query) use ($validated): Builder {
                 return $query->where('id', 'like', '%' . $validated['id'] . '%');
             })
-            ->when($validated['message'] ?? null, function ($query) use ($validated) {
+            ->when($validated['message'] ?? null, function (Builder $query) use ($validated): Builder {
                 return $query->where('message', 'like', '%' . $validated['message'] . '%');
             })
-            ->when($validated['start_at'] ?? null, function ($query) use ($validated) {
+            ->when($validated['start_at'] ?? null, function (Builder $query) use ($validated): Builder {
                 return $query->whereBetween('created_at', [$validated['start_at'], $validated['end_at']]);
             });
 
@@ -162,16 +162,16 @@ class ExceptionError extends Model
 
         $logs = $model->select(
             [
-            'id',
-            'message',
-            'code',
-            'file',
-            'line',
-            'trace',
-            'trace_as_string',
-            'is_solve',
-            'created_at',
-            'updated_at'
+                'id',
+                'message',
+                'code',
+                'file',
+                'line',
+                'trace',
+                'trace_as_string',
+                'is_solve',
+                'created_at',
+                'updated_at'
             ]
         )
             ->orderBy($validated['sort'] ?? 'updated_at', $validated['order'] === 'ascending' ? 'asc' : 'desc')
@@ -189,14 +189,14 @@ class ExceptionError extends Model
     /**
      * 修正错误信息
      */
-    public function solve(): void
+    public function solve(Admin $admin): void
     {
         $this->is_solve = 1;
         $this->save();
         activity()
             ->useLog('exception')
             ->performedOn($this)
-            ->causedBy(Auth::guard('admin')->user())
+            ->causedBy($admin)
             ->log('The :subject.id exception amended by :causer.name');
     }
 }

@@ -14,7 +14,7 @@ class CreateDirectoryRequest extends FormRequest
      *
      * @return bool
      */
-    public function authorize()
+    public function authorize(): bool
     {
         return true;
     }
@@ -24,7 +24,7 @@ class CreateDirectoryRequest extends FormRequest
      *
      * @return array
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             'directory' => [
@@ -38,7 +38,7 @@ class CreateDirectoryRequest extends FormRequest
      *
      * @return array
      */
-    public function attributes()
+    public function attributes(): array
     {
         return [
             'directory' => __('message.file.directory'),
@@ -50,7 +50,7 @@ class CreateDirectoryRequest extends FormRequest
      *
      * @return array
      */
-    public function messages()
+    public function messages(): array
     {
         return [
 

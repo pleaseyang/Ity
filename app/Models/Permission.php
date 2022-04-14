@@ -4,9 +4,11 @@
 namespace App\Models;
 
 use App\Util\Arr;
+use App\Util\FunctionReturn;
+use Exception;
+use Illuminate\Database\Eloquent\Builder;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
-use Spatie\Permission\Exceptions\PermissionDoesNotExist;
 
 /**
  * App\Models\Permission
@@ -75,16 +77,16 @@ class Permission extends \Spatie\Permission\Models\Permission
         $where[] = ['guard_name', '=', $data['guard_name']];
 
         $model = Permission::where($where)
-            ->when($data['name'] ?? null, function ($query) use ($data) {
+            ->when($data['name'] ?? null, function (Builder $query) use ($data): Builder {
                 return $query->where('name', 'like', '%' . $data['name'] . '%');
             })
-            ->when($data['title'] ?? null, function ($query) use ($data) {
+            ->when($data['title'] ?? null, function (Builder $query) use ($data): Builder {
                 return $query->where('title', 'like', '%' . $data['title'] . '%');
             })
-            ->when($data['path'] ?? null, function ($query) use ($data) {
+            ->when($data['path'] ?? null, function (Builder $query) use ($data): Builder {
                 return $query->where('path', 'like', '%' . $data['path'] . '%');
             })
-            ->when($data['start_at'] ?? null, function ($query) use ($data) {
+            ->when($data['start_at'] ?? null, function (Builder $query) use ($data): Builder {
                 return $query->whereBetween('created_at', [$data['start_at'], $data['end_at']]);
             });
 
@@ -109,10 +111,10 @@ class Permission extends \Spatie\Permission\Models\Permission
      * 删除权限
      *
      * @param int $id
-     * @return array
-     * @throws \Exception
+     * @return FunctionReturn
+     * @throws Exception
      */
-    public static function __deleted(int $id): array
+    public static function __deleted(int $id): FunctionReturn
     {
         $result = false;
         $message = __('message.common.delete.fail');
@@ -128,10 +130,7 @@ class Permission extends \Spatie\Permission\Models\Permission
             }
         }
 
-        return [
-            'result' => $result,
-            'message' => $message
-        ];
+        return new FunctionReturn($result, $message, []);
     }
 
     /**
@@ -158,7 +157,7 @@ class Permission extends \Spatie\Permission\Models\Permission
      * @param string $type 操作类型
      * @return bool
      */
-    public static function drop(int $dragging, int $drop, string $type) : bool
+    public static function drop(int $dragging, int $drop, string $type): bool
     {
         $update = [];
         switch ($type) {

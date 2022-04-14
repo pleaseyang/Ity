@@ -4,6 +4,8 @@
 namespace App\Models;
 
 
+use Illuminate\Database\Eloquent\Builder;
+
 /**
  * App\Models\Activity
  *
@@ -56,28 +58,28 @@ class Activity extends \Spatie\Activitylog\Models\Activity
         $where = [];
 
         $model = Activity::where($where)
-            ->when($validated['log_name'] ?? null, function ($query) use ($validated) {
+            ->when($validated['log_name'] ?? null, function (Builder $query) use ($validated): Builder {
                 return $query->where('log_name', 'like', '%' . $validated['log_name'] . '%');
             })
-            ->when($validated['description'] ?? null, function ($query) use ($validated) {
+            ->when($validated['description'] ?? null, function (Builder $query) use ($validated): Builder {
                 return $query->where('description', 'like', '%' . $validated['description'] . '%');
             })
-            ->when($validated['subject_id'] ?? null, function ($query) use ($validated) {
+            ->when($validated['subject_id'] ?? null, function (Builder $query) use ($validated): Builder {
                 return $query->where('subject_id', '=', $validated['subject_id']);
             })
-            ->when($validated['subject_type'] ?? null, function ($query) use ($validated) {
+            ->when($validated['subject_type'] ?? null, function (Builder $query) use ($validated): Builder {
                 return $query->where('subject_type', '=', $validated['subject_type']);
             })
-            ->when($validated['causer_id'] ?? null, function ($query) use ($validated) {
+            ->when($validated['causer_id'] ?? null, function (Builder $query) use ($validated): Builder {
                 return $query->where('causer_id', '=', $validated['causer_id']);
             })
-            ->when($validated['causer_type'] ?? null, function ($query) use ($validated) {
+            ->when($validated['causer_type'] ?? null, function (Builder $query) use ($validated): Builder {
                 return $query->where('causer_type', '=', $validated['causer_type']);
             })
-            ->when($validated['properties'] ?? null, function ($query) use ($validated) {
+            ->when($validated['properties'] ?? null, function (Builder $query) use ($validated): Builder {
                 return $query->where('properties', 'like', '%' . $validated['properties'] . '%');
             })
-            ->when($validated['start_at'] ?? null, function ($query) use ($validated) {
+            ->when($validated['start_at'] ?? null, function (Builder $query) use ($validated): Builder {
                 return $query->whereBetween('created_at', [$validated['start_at'], $validated['end_at']]);
             });
 

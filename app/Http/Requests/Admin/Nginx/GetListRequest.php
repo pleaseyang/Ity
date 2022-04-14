@@ -11,7 +11,7 @@ class GetListRequest extends FormRequest
      *
      * @return bool
      */
-    public function authorize()
+    public function authorize(): bool
     {
         return true;
     }
@@ -21,7 +21,7 @@ class GetListRequest extends FormRequest
      *
      * @return array
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             'offset' => ['required', 'numeric', 'gte:0'],
@@ -45,7 +45,7 @@ class GetListRequest extends FormRequest
      *
      * @return array
      */
-    public function attributes()
+    public function attributes(): array
     {
         return [
             'offset' => __('message.common.offset'),

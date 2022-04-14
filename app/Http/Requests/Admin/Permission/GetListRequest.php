@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests\Admin\Permission;
 
-use Illuminate\Foundation\Http\FormRequest;
 use App\Http\Requests\GetListRequest as CommonRequest;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 class GetListRequest extends FormRequest
@@ -13,7 +13,7 @@ class GetListRequest extends FormRequest
      *
      * @return bool
      */
-    public function authorize()
+    public function authorize(): bool
     {
         return true;
     }
@@ -23,12 +23,12 @@ class GetListRequest extends FormRequest
      *
      * @return array
      */
-    public function rules()
+    public function rules(): array
     {
         return array_merge((new CommonRequest())->rules(), [
-            'name' => ['nullable', 'string', 'between:2,60',],
-            'title' => ['nullable', 'string', 'between:2,60',],
-            'path' => ['nullable', 'string', 'between:2,60',],
+            'name' => ['nullable', 'string',],
+            'title' => ['nullable', 'string',],
+            'path' => ['nullable', 'string',],
             'guard_name' => ['required', 'string', Rule::in(['api', 'admin']),],
         ]);
     }
@@ -38,7 +38,7 @@ class GetListRequest extends FormRequest
      *
      * @return array
      */
-    public function attributes()
+    public function attributes(): array
     {
         return array_merge((new CommonRequest())->attributes(), [
             'name' => __('message.permission.name'),

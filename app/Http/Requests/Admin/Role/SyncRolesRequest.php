@@ -14,12 +14,9 @@ class SyncRolesRequest extends FormRequest
      *
      * @return bool
      */
-    public function authorize()
+    public function authorize(): bool
     {
-        if ($this->guardName() !== '') {
-            return  true;
-        }
-        return false;
+        return true;
     }
 
     /**
@@ -27,7 +24,7 @@ class SyncRolesRequest extends FormRequest
      *
      * @return array
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             'guard_name' => ['required', 'string', 'between:2,60', Rule::in(['api', 'admin']),],
@@ -41,7 +38,7 @@ class SyncRolesRequest extends FormRequest
      *
      * @return array
      */
-    public function attributes()
+    public function attributes(): array
     {
         return [
             'roles' => __('message.role.id'),
@@ -55,7 +52,7 @@ class SyncRolesRequest extends FormRequest
      *
      * @return array
      */
-    public function messages()
+    public function messages(): array
     {
         return [
 
@@ -67,17 +64,14 @@ class SyncRolesRequest extends FormRequest
      *
      * @return string
      */
-    public function guardName()
+    public function guardName(): string
     {
         $guardName = $this->post('guard_name', '');
-        switch ($guardName) {
-            case 'api':
-                return 'App\Models\User';
-            case 'admin':
-                return 'App\Models\Admin';
-            default:
-                return '';
-        }
+        return match ($guardName) {
+            'api' => 'App\Models\User',
+            'admin' => 'App\Models\Admin',
+            default => '',
+        };
     }
 
 
@@ -86,17 +80,14 @@ class SyncRolesRequest extends FormRequest
      *
      * @return Admin|User|null
      */
-    public function guard()
+    public function guard(): Admin|User|null
     {
         $guardName = $this->post('guard_name', '');
         $guardId = $this->post('guard_id', '');
-        switch ($guardName) {
-            case 'api':
-                return User::find($guardId);
-            case 'admin':
-                return Admin::find($guardId);
-            default:
-                return null;
-        }
+        return match ($guardName) {
+            'api' => User::find($guardId),
+            'admin' => Admin::find($guardId),
+            default => null,
+        };
     }
 }

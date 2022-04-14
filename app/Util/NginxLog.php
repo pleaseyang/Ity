@@ -12,11 +12,11 @@ use Illuminate\Support\Str;
 
 class NginxLog
 {
-    private mixed $filePath;
+    private string $filePath;
 
     /**
      * NginxLog constructor.
-     * @param $filePath
+     * @param string $filePath
      * @throws FileNotFoundException
      */
     public function __construct($filePath)
@@ -127,19 +127,19 @@ class NginxLog
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getFilePath(): mixed
+    public function getFilePath(): string
     {
         return $this->filePath;
     }
 
     /**
-     * @param mixed $filePath
+     * @param string $filePath
      * @return void
      * @throws FileNotFoundException
      */
-    private function setFilePath(mixed $filePath)
+    private function setFilePath(string $filePath)
     {
         if (Storage::disk('logs')->get($filePath) === null) {
             throw new FileNotFoundException(__('message.file.not_found'));

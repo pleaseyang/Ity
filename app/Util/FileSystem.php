@@ -3,11 +3,13 @@
 namespace App\Util;
 
 use App\Http\Requests\Admin\FileSystem\UploadRequest;
+use Exception;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Contracts\Filesystem\Filesystem as DiskFileSystem;
 use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * Class FileSystem
@@ -189,11 +191,16 @@ class FileSystem
      * 下载文件(流)
      *
      * @param string $file
-     * @return mixed
+     * @return StreamedResponse
+     * @throws Exception
      */
-    public function download(string $file)
+    public function download(string $file): StreamedResponse
     {
-        return $this->getDisk()->download($file);
+        if ($this->getDisk()->exists($file)) {
+            return $this->getDisk()->download($file);
+        }
+
+        throw new Exception(__('message.file.not_found'));
     }
 
     /**

@@ -30,7 +30,7 @@ class ParentDirectory implements Rule
      * @param  mixed  $value
      * @return bool
      */
-    public function passes($attribute, $value)
+    public function passes($attribute, $value): bool
     {
         return !Str::contains($value, '..');
     }
@@ -40,7 +40,7 @@ class ParentDirectory implements Rule
      *
      * @return string
      */
-    public function message()
+    public function message(): string
     {
         return trans('validation.parent_directory');
     }
