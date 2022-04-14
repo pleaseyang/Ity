@@ -11,7 +11,7 @@ use Str;
 
 class Routes
 {
-    private $admin;
+    private Admin $admin;
 
     /**
      * Routes constructor.

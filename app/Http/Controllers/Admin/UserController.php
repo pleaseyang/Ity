@@ -81,10 +81,10 @@ class UserController extends Controller
     {
         $validated = $request->validated();
         $resultData = User::updateSave($validated);
-        if ($resultData['result']) {
+        if ($resultData->isStatus()) {
             return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
                 ->withHttpCode(ApiCode::HTTP_OK)
-                ->withData($resultData['user'])
+                ->withData($resultData->getData('user'))
                 ->withMessage(__('message.common.update.success'))
                 ->build();
         }

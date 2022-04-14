@@ -14,6 +14,7 @@ class AdminTest extends TestCase
             "offset" => 0,
             "limit" => 10,
             "order" => "descending",
+            "name" => 'test'
         ]);
         dd($res);
     }

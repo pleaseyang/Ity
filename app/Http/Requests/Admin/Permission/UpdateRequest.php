@@ -2,28 +2,18 @@
 
 namespace App\Http\Requests\Admin\Permission;
 
-use App\Models\Permission;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use Spatie\Permission\Exceptions\PermissionDoesNotExist;
 
 class UpdateRequest extends FormRequest
 {
-
-    public $permission;
-
     /**
      * Determine if the user is authorized to make this request.
      *
      * @return bool
      */
-    public function authorize()
+    public function authorize(): bool
     {
-        try {
-            $this->permission = Permission::find($this->post('id', 0));
-        } catch (PermissionDoesNotExist $exception) {
-            return false;
-        }
         return true;
     }
 
@@ -32,8 +22,9 @@ class UpdateRequest extends FormRequest
      *
      * @return array
      */
-    public function rules()
+    public function rules(): array
     {
+        $id = $this->post('id', 0);
         $tableNames = config('permission.table_names');
         return [
             'id' => ['required', 'integer',],
@@ -43,13 +34,13 @@ class UpdateRequest extends FormRequest
             ],
             'name' => [
                 'required', 'string', 'between:2,60',
-                Rule::unique($tableNames['permissions'])->ignore($this->permission),
+                Rule::unique($tableNames['permissions'])->ignore($id),
             ],
             'title' => ['required', 'string', 'between:2,60',],
             'icon' => ['required', 'string', 'between:2,60',],
             'path' => [
                 'required', 'string', 'between:2,60',
-                Rule::unique($tableNames['permissions'])->ignore($this->permission),
+                Rule::unique($tableNames['permissions'])->ignore($id),
             ],
             'component' => ['required', 'string', 'between:2,60',],
             'guard_name' => ['required', 'string', 'between:2,60', Rule::in(['api', 'admin']),],
@@ -63,7 +54,7 @@ class UpdateRequest extends FormRequest
      *
      * @return array
      */
-    public function attributes()
+    public function attributes(): array
     {
         return [
             'pid' => __('message.permission.pid'),
@@ -83,7 +74,7 @@ class UpdateRequest extends FormRequest
      *
      * @return array
      */
-    public function messages()
+    public function messages(): array
     {
         return [
 

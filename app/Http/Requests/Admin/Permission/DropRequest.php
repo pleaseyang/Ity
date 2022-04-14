@@ -12,7 +12,7 @@ class DropRequest extends FormRequest
      *
      * @return bool
      */
-    public function authorize()
+    public function authorize(): bool
     {
         return true;
     }
@@ -22,7 +22,7 @@ class DropRequest extends FormRequest
      *
      * @return array
      */
-    public function rules()
+    public function rules(): array
     {
         $tableNames = config('permission.table_names');
         return [
@@ -37,7 +37,7 @@ class DropRequest extends FormRequest
      *
      * @return array
      */
-    public function attributes()
+    public function attributes(): array
     {
         return [
             'dragging' => __('message.permission.permission'),

@@ -11,7 +11,7 @@ class SyncPermissionsRequest extends FormRequest
      *
      * @return bool
      */
-    public function authorize()
+    public function authorize(): bool
     {
         return true;
     }
@@ -21,7 +21,7 @@ class SyncPermissionsRequest extends FormRequest
      *
      * @return array
      */
-    public function rules()
+    public function rules(): array
     {
         $tableNames = config('permission.table_names');
         return [
@@ -35,7 +35,7 @@ class SyncPermissionsRequest extends FormRequest
      *
      * @return array
      */
-    public function attributes()
+    public function attributes(): array
     {
         return [
             'id' => __('message.role.id'),
@@ -48,7 +48,7 @@ class SyncPermissionsRequest extends FormRequest
      *
      * @return array
      */
-    public function messages()
+    public function messages(): array
     {
         return [
 

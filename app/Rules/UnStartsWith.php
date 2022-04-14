@@ -17,7 +17,7 @@ class UnStartsWith implements Rule
     /**
      * @var string
      */
-    private $str;
+    private string $str;
 
     /**
      * Create a new rule instance.
@@ -32,11 +32,11 @@ class UnStartsWith implements Rule
     /**
      * Determine if the validation rule passes.
      *
-     * @param  string  $attribute
-     * @param  mixed  $value
+     * @param string $attribute
+     * @param mixed $value
      * @return bool
      */
-    public function passes($attribute, $value)
+    public function passes($attribute, $value): bool
     {
         return !Str::startsWith($value, $this->str);
     }
@@ -46,7 +46,7 @@ class UnStartsWith implements Rule
      *
      * @return string
      */
-    public function message()
+    public function message(): string
     {
         return trans('validation.un_starts_with', ['values' => $this->str]);
     }

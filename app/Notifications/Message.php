@@ -11,15 +11,15 @@ class Message extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    public $data;
+    public array $data;
 
     /**
      * Create a new notification instance.
      *
-     * @param  mixed  $data
+     * @param  array  $data
      * @return void
      */
-    public function __construct($data)
+    public function __construct(array $data)
     {
         $this->data = $data;
     }
@@ -30,7 +30,7 @@ class Message extends Notification implements ShouldQueue
      * @param  mixed  $notifiable
      * @return array
      */
-    public function via($notifiable)
+    public function via($notifiable): array
     {
         return ['database'];
     }
@@ -40,7 +40,7 @@ class Message extends Notification implements ShouldQueue
      *
      * @return array
      */
-    public function viaQueues()
+    public function viaQueues(): array
     {
         return [
             'database' => 'notification',
@@ -53,7 +53,7 @@ class Message extends Notification implements ShouldQueue
      * @param  mixed  $notifiable
      * @return array
      */
-    public function toArray($notifiable)
+    public function toArray($notifiable): array
     {
         return [
             'form' => $this->data['form'],

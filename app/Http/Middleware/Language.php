@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\App;
 class Language
 {
     /**
-     * Handle an incoming request.
+     * Handle an incoming request
      *
      * @param Request $request
      * @param Closure $next

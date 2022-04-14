@@ -16,8 +16,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class NotificationController extends Controller
 {
-    /** @var Admin */
-    private $user;
+    private Admin $user;
 
     /**
      * NotificationController constructor.
@@ -25,8 +24,9 @@ class NotificationController extends Controller
     public function __construct()
     {
         $this->middleware('auth:admin');
-        /** @var Admin */
-        $this->user = Auth::guard('admin')->user();
+        /** @var Admin $user */
+        $user = Auth::guard('admin')->user();
+        $this->user = $user;
     }
 
     /**
@@ -128,7 +128,7 @@ class NotificationController extends Controller
             $adminModel->whereIn('id', $validated['admins']);
         }
 
-        $adminModel->get()->each(function ($admin) use ($validated) {
+        $adminModel->get()->each(function (Admin $admin) use ($validated): void {
             $admin->notify(new Message([
                 'form' => $this->user->name,
                 'message' => $validated['message']

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Notifications\DatabaseNotification as DatabaseNotificationModel;
 use Illuminate\Support\Str;
@@ -50,34 +51,34 @@ class DatabaseNotification extends DatabaseNotificationModel
     {
         $model = DatabaseNotification::whereNotifiableType(get_class($guard))
             ->whereNotifiableId($guard->id)
-            ->when($validated['message'] ?? null, function ($query) use ($validated) {
+            ->when($validated['message'] ?? null, function (Builder $query) use ($validated): Builder {
                 return $query->where('data', 'like', '%' . $validated['message'] . '%');
             })
-            ->when(isset($validated['is_read']), function ($query) use ($validated) {
+            ->when(isset($validated['is_read']), function (Builder $query) use ($validated): Builder {
                 if ($validated['is_read'] === 0) {
                     return $query->whereNull('read_at');
                 } else {
                     return $query->whereNotNull('read_at');
                 }
             })
-            ->when($validated['start_at'] ?? null, function ($query) use ($validated) {
+            ->when($validated['start_at'] ?? null, function (Builder $query) use ($validated): Builder {
                 return $query->whereBetween('created_at', [$validated['start_at'], $validated['end_at']]);
             });
 
         $total = $model->count('id');
 
         $notifications = $model->select([
-                'id',
-                'data',
-                'read_at',
-                'created_at',
-                'updated_at'
-            ])
+            'id',
+            'data',
+            'read_at',
+            'created_at',
+            'updated_at'
+        ])
             ->orderBy($validated['sort'] ?? 'created_at', $validated['order'] === 'ascending' ? 'asc' : 'desc')
             ->offset(($validated['offset'] - 1) * $validated['limit'])
             ->limit($validated['limit'])
             ->get()
-            ->map(function ($notification) {
+            ->map(function (DatabaseNotification $notification): DatabaseNotification {
                 // 只保留KEY值 去除HTML标签 最多100个字符 拼接...
                 $data = preg_replace("/(\s|\&nbsp\;|　|\xc2\xa0)/", " ", strip_tags(implode(' ', $notification->data)));
                 $notification->data = Str::limit($data, 100, '...');

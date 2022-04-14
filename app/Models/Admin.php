@@ -2,16 +2,19 @@
 
 namespace App\Models;
 
+use App\Util\FunctionReturn;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Query\Builder as Query;
+use Illuminate\Database\Query\JoinClause;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Permission\Traits\HasRoles;
-use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
+use stdClass;
 
 /**
  * App\Models\Admin
@@ -119,29 +122,29 @@ class Admin extends Authenticatable implements JWTSubject
      */
     public static function getList(array $validated): array
     {
-        $model = DB::table(function ($query) use ($validated) {
+        $model = DB::table(function (Query $query) use ($validated) {
             $query->from('admins')
                 ->groupBy('admins.id')
-                ->join('model_has_roles', function ($join) {
+                ->join('model_has_roles', function (JoinClause $join) {
                     $join->on('admins.id', '=', 'model_has_roles.model_id')
                         ->where('model_type', '=', 'App\\Models\\Admin');
                 }, null, null, 'left')
                 ->leftJoin('roles', 'roles.id', '=', 'model_has_roles.role_id')
-                ->when($validated['name'] ?? null, function ($query) use ($validated) {
+                ->when($validated['name'] ?? null, function (Query $query) use ($validated): Query {
                     return $query->where('admins.name', 'like', '%' . $validated['name'] . '%');
                 })
-                ->when($validated['email'] ?? null, function ($query) use ($validated) {
+                ->when($validated['email'] ?? null, function (Query $query) use ($validated): Query {
                     return $query->where('admins.email', 'like', '%' . $validated['email'] . '%');
                 })
-                ->when(is_numeric($validated['status']), function ($query) use ($validated) {
+                ->when(isset($validated['status']) && is_numeric($validated['status']), function (Query $query) use ($validated): Query {
                     return $query->where('admins.status', '=', $validated['status']);
                 })
-                ->when($validated['start_at'] ?? null, function ($query) use ($validated) {
+                ->when($validated['start_at'] ?? null, function (Query $query) use ($validated): Query {
                     return $query->whereBetween('admins.created_at', [$validated['start_at'], $validated['end_at']]);
                 })
                 ->when(
                     isset($validated['role_ids']) && count($validated['role_ids']),
-                    function ($query) use ($validated) {
+                    function (Query $query) use ($validated): Query {
                         $roleIds = implode('|', $validated['role_ids']);
                         return $query->havingRaw("CONCAT (',',role_ids,',') REGEXP ',({$roleIds}),'");
                     }
@@ -164,9 +167,9 @@ class Admin extends Authenticatable implements JWTSubject
             ->offset(($validated['offset'] - 1) * $validated['limit'])
             ->limit($validated['limit'])
             ->get()
-            ->map(function ($admin) {
-                $admin->role_ids = is_string($admin->role_ids) ? explode(',', $admin->role_ids): [];
-                $admin->role_names = is_string($admin->role_names) ? explode(',', $admin->role_names): [];
+            ->map(function (stdClass $admin): stdClass {
+                $admin->role_ids = is_string($admin->role_ids) ? explode(',', $admin->role_ids) : [];
+                $admin->role_names = is_string($admin->role_names) ? explode(',', $admin->role_names) : [];
                 return $admin;
             });
 
@@ -180,9 +183,9 @@ class Admin extends Authenticatable implements JWTSubject
      * 创建
      *
      * @param array $attributes
-     * @return Builder|Model
+     * @return Admin
      */
-    public static function create(array $attributes): Model|Builder
+    public static function create(array $attributes): Admin
     {
         $attributes['password'] = Hash::make($attributes['password']);
         return static::query()->create($attributes);
@@ -194,7 +197,7 @@ class Admin extends Authenticatable implements JWTSubject
      * @param array $data
      * @return array
      */
-    public static function updateSave(array $data): array
+    public static function updateSave(array $data): FunctionReturn
     {
         if (isset($data['password'])) {
             $data['password'] = Hash::make($data['password']);
@@ -203,9 +206,8 @@ class Admin extends Authenticatable implements JWTSubject
         $admin = Admin::find($data['id']);
         unset($data['id']);
 
-        return [
-            'result' => $admin->update($data),
+        return new FunctionReturn($admin->update($data), '', [
             'admin' => $admin
-        ];
+        ]);
     }
 }

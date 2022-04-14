@@ -23,7 +23,7 @@ class JWTRoleAuth extends BaseMiddleware
     {
         try {
             $tokenRole = $this->auth->parseToken()->getClaim('role');
-        } catch (JWTException $e) {
+        } catch (JWTException) {
             return $next($request);
         }
         if ($tokenRole !== $role) {
