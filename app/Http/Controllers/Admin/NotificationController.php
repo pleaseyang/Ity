@@ -16,7 +16,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class NotificationController extends Controller
 {
-    private Admin $user;
+    private Admin|null $user;
 
     /**
      * NotificationController constructor.
