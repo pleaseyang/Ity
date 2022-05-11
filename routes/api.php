@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\Admin\ActiveLogController;
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\DictDataController;
+use App\Http\Controllers\Admin\DictTypeController;
 use App\Http\Controllers\Admin\ExceptionErrorController;
 use App\Http\Controllers\Admin\FileSystemController;
 use App\Http\Controllers\Admin\LoginController;
@@ -109,6 +111,20 @@ Route::middleware(['lang'])->prefix('admin')->name('admin.')->group(function () 
             Route::post('file/delete', [FileSystemController::class, 'delete'])->middleware('permission:file.delete');
             // NGINX
             Route::post('nginx/logs', [NginxController::class, 'logs']);// ->middleware('permission:nginx.logs')
+            // 字典
+            Route::post('dictTypes', [DictTypeController::class, 'list']);
+            Route::post('dictType', [DictTypeController::class, 'info']);
+            Route::post('dictType/select', [DictTypeController::class, 'select']);
+            Route::post('dictType/create', [DictTypeController::class, 'create']);
+            Route::post('dictType/update', [DictTypeController::class, 'update']);
+            Route::post('dictType/delete', [DictTypeController::class, 'delete']);
+
+            Route::post('dictData/list', [DictDataController::class, 'list']);
+            Route::post('dictData', [DictDataController::class, 'info']);
+            Route::post('dictData/create', [DictDataController::class, 'create']);
+            Route::post('dictData/update', [DictDataController::class, 'update']);
+            Route::post('dictData/delete', [DictDataController::class, 'delete']);
+            Route::post('dictData/listClass', [DictDataController::class, 'listClass']);
         });
     });
 });

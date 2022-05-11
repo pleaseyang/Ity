@@ -99,5 +99,21 @@ return [
         'is_error' => '错误',
         'is_robot' => '机器',
         'is_mobile' => '手机',
+    ],
+    'dict_type' => [
+        'name' => '字典名称',
+        'type' => '字典类型',
+        'status' => '字典状态',
+        'remark' => '字典备注',
+    ],
+    'dict_data' => [
+        'dict_type_id' => '字典 ID',
+        'sort' => '字典排序',
+        'label' => '字典标签',
+        'value' => '字典键值',
+        'list_class' => '表格回显样式',
+        'default' => '默认',
+        'status' => '状态',
+        'remark' => '备注',
     ]
 ];

@@ -98,5 +98,21 @@ return [
         'is_error' => 'Error',
         'is_robot' => 'Robot',
         'is_mobile' => 'Mobile',
+    ],
+    'dict_type' => [
+        'name' => 'Dictionary name',
+        'type' => 'Dictionary type',
+        'status' => 'Dictionary status',
+        'remark' => 'Dictionary remark',
+    ],
+    'dict_data' => [
+        'dict_type_id' => 'Dictionary ID',
+        'sort' => 'Sort',
+        'label' => 'Label',
+        'value' => 'Value',
+        'list_class' => 'Table echo style',
+        'default' => 'Default',
+        'status' => 'Status',
+        'remark' => 'Remark',
     ]
 ];

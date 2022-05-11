@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -53,5 +55,36 @@ class DictType extends Model
             ->useLogName('dict_type')
             ->logFillable()
             ->logUnguarded();
+    }
+
+    public static function list(array $validated): array
+    {
+        $model = DictType::when($validated['name'] ?? null, function (Builder $builder) use ($validated): Builder {
+            return $builder->where('name', 'like', '%' . $validated['name'] . '%');
+        })->when($validated['type'] ?? null, function (Builder $builder) use ($validated): Builder {
+            return $builder->where('type', 'like', '%' . $validated['type'] . '%');
+        })->when(isset($validated['status']) && is_numeric($validated['status']), function (Builder $builder) use ($validated): Builder {
+            return $builder->where('status', '=', $validated['status']);
+        })->when($validated['start_at'] ?? null, function (Builder $builder) use ($validated): Builder {
+            return $builder->whereBetween('created_at', [$validated['start_at'], $validated['end_at']]);
+        });
+
+        $total = $model->count('id');
+
+        $data = $model->select(['id', 'name', 'type', 'status', 'remark', 'created_at', 'updated_at'])
+            ->orderBy($validated['sort'] ?? 'created_at', $validated['order'] === 'ascending' ? 'asc' : 'desc')
+            ->offset(($validated['offset'] - 1) * $validated['limit'])
+            ->limit($validated['limit'])
+            ->get();
+
+        return [
+            'data' => $data,
+            'total' => $total
+        ];
+    }
+
+    public static function selectAll(): Collection
+    {
+        return DictType::select(['id', 'name'])->get();
     }
 }

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -61,5 +62,38 @@ class DictData extends Model
             ->useLogName('dict_data')
             ->logFillable()
             ->logUnguarded();
+    }
+
+    public static function list(array $validated): array
+    {
+        $model = DictData::whereDictTypeId($validated['dict_type_id'])
+            ->when($validated['label'] ?? null, function (Builder $builder) use ($validated): Builder {
+                return $builder->where('label', 'like', '%' . $validated['label'] . '%');
+            })->when($validated['value'] ?? null, function (Builder $builder) use ($validated): Builder {
+                return $builder->where('value', 'like', '%' . $validated['value'] . '%');
+            })->when(isset($validated['default']) && is_numeric($validated['default']), function (Builder $builder) use ($validated): Builder {
+                return $builder->where('default', '=', $validated['default']);
+            })->when(isset($validated['status']) && is_numeric($validated['status']), function (Builder $builder) use ($validated): Builder {
+                return $builder->where('status', '=', $validated['status']);
+            })->when($validated['start_at'] ?? null, function (Builder $builder) use ($validated): Builder {
+                return $builder->whereBetween('created_at', [$validated['start_at'], $validated['end_at']]);
+            });
+
+        $total = $model->count('id');
+
+        $data = $model->select([
+            'id', 'dict_type_id', 'sort', 'label', 'value', 'list_class', 'default', 'status', 'remark',
+            'created_at', 'updated_at'
+        ])
+            ->orderByDesc('default')
+            ->orderByDesc('sort')
+            ->offset(($validated['offset'] - 1) * $validated['limit'])
+            ->limit($validated['limit'])
+            ->get();
+
+        return [
+            'data' => $data,
+            'total' => $total
+        ];
     }
 }
