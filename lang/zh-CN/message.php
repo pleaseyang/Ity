@@ -115,5 +115,13 @@ return [
         'default' => '默认',
         'status' => '状态',
         'remark' => '备注',
+        'list_class_type' => [
+            'default' => '默认',
+            'primary' => '主要',
+            'success' => '成功',
+            'info' => '信息',
+            'warning' => '警告',
+            'danger' => '危险',
+        ]
     ]
 ];

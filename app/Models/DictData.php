@@ -96,4 +96,14 @@ class DictData extends Model
             'total' => $total
         ];
     }
+
+    public static function setDefault(DictData $data): void
+    {
+        DictData::whereDictTypeId($data->dict_type_id)
+            ->where('id', '!=', $data->id)
+            ->update([
+                'default' => 0,
+                'updated_at' => now()
+            ]);
+    }
 }

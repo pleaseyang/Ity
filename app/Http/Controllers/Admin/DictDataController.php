@@ -55,9 +55,14 @@ class DictDataController extends Controller
     public function create(CreateRequest $request): Response
     {
         $validated = $request->validated();
+        $data = DictData::create($validated);
+        $default = $validated['default'] ?? false;
+        if ($default) {
+            DictData::setDefault($data);
+        }
         return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
             ->withHttpCode(ApiCode::HTTP_OK)
-            ->withData(DictData::create($validated))
+            ->withData($data)
             ->withMessage(__('message.common.create.success'))
             ->build();
     }
@@ -73,6 +78,10 @@ class DictDataController extends Controller
         $validated = $request->validated();
         $model = DictData::find($validated['id']);
         $model->update($validated);
+        $default = $validated['default'] ?? false;
+        if ($default) {
+            DictData::setDefault($model);
+        }
         return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
             ->withHttpCode(ApiCode::HTTP_OK)
             ->withData($model)
@@ -102,12 +111,12 @@ class DictDataController extends Controller
             ->withHttpCode(ApiCode::HTTP_OK)
             ->withData([
                 'list' => [
-                    ['name' => '默认', 'value' => ''],
-                    ['name' => '主要', 'value' => 'primary'],
-                    ['name' => '成功', 'value' => 'success'],
-                    ['name' => '信息', 'value' => 'info'],
-                    ['name' => '警告', 'value' => 'warning'],
-                    ['name' => '危险', 'value' => 'danger'],
+                    ['name' => __('message.dict_data.list_class_type.default'), 'value' => ''],
+                    ['name' => __('message.dict_data.list_class_type.primary'), 'value' => 'primary'],
+                    ['name' => __('message.dict_data.list_class_type.success'), 'value' => 'success'],
+                    ['name' => __('message.dict_data.list_class_type.info'), 'value' => 'info'],
+                    ['name' => __('message.dict_data.list_class_type.warning'), 'value' => 'warning'],
+                    ['name' => __('message.dict_data.list_class_type.danger'), 'value' => 'danger'],
                 ]
             ])
             ->withMessage(__('message.common.search.success'))

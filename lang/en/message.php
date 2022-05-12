@@ -114,5 +114,13 @@ return [
         'default' => 'Default',
         'status' => 'Status',
         'remark' => 'Remark',
+        'list_class_type' => [
+            'default' => 'Default',
+            'primary' => 'Primary',
+            'success' => 'Success',
+            'info' => 'Info',
+            'warning' => 'Warning',
+            'danger' => 'Danger',
+        ]
     ]
 ];
