@@ -277,6 +277,9 @@ class GenTable extends Model
             if ($column->_foreign) {
                 array_push($rule, "Rule::exists('$column->_foreign_table', '$column->_foreign_column')");
             }
+            if ($column->primary && $column->autoincrement) {
+                array_push($rule, "Rule::exists('$tableName', '$column->name')");
+            }
             return "'$column->name' => [" . implode(', ', $rule) . "],";
         })->implode("\n            ");
         $updateRequestColumn = '$' . $primary->name . ' = $this->post(\'' . $primary->name . '\', 0);';
