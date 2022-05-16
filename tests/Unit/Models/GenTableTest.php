@@ -17,19 +17,27 @@ class GenTableTest extends TestCase
 
     public function testImportTableList()
     {
-        dd(GenTable::importTable('users_copy'));
+        dd(GenTable::importTable('test_db'));
     }
 
     public function testGen()
     {
-        dd(GenTable::gen('users_copy', 0, '用户'));
+        dd(GenTable::gen('test_db', 0, '小学生'));
     }
 
     public function testSetDict()
     {
-        $m = GenTableColumn::where('id', 2)->first();
+        $m = GenTableColumn::where('id', 30)->first();
         $d = DictType::where('type', 'sex')->first();
         $m->setDict($d);
         dd($m);
+    }
+
+    public function testSetType()
+    {
+        $m = GenTableColumn::where('id', 29)->first();
+        $m->setType('file');
+        $m = GenTableColumn::where('id', 31)->first();
+        $m->setType('editor');
     }
 }

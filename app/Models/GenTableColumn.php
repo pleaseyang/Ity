@@ -128,6 +128,7 @@ class GenTableColumn extends Model
         $this->_show = Gen::TYPE_SELECT;
         $this->_validate = 'string';
         $this->dict_type_id = $dictType->id;
+        $this->_select = true;
         $this->_unique = false;
         $this->_foreign = false;
         $this->_foreign_table = null;

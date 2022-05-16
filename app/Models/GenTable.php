@@ -209,7 +209,10 @@ class GenTable extends Model
         $path = "php/app/Http/Requests/Admin/{$className}/GetListRequest.php";
         Storage::disk('codes')->put($path, $selectRequest);
 
-        $insertColumns = $columns->where('_insert', '=', true)->values();
+        $insertColumns = $columns->where('primary', '=', false)
+            ->where('autoincrement', '=', false)
+            ->where('_insert', '=', true)
+            ->values();
         $insertRules = $insertColumns->map(function (GenTableColumn $column) use ($tableName, $singular): string {
             $required = $column->_required ? 'required' : 'nullable';
             $rule = [

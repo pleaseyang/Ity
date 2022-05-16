@@ -131,28 +131,25 @@ class Gen
 
         $columnsConfigData = array_map(function (array $column) use ($uniques, $foreignKeys) {
             $insert = true;
-            $update = true;
             $list = true;
             $select = true;
             // 如果是自增主键
             if ($column['primary'] && $column['autoincrement']) {
                 $insert = false;
-                $update = true;
                 $list = false;
                 $select = false;
             }
 
             $query = Gen::query($column['type']);
             $validate = Gen::validate($column['type']);
-            $required = Gen::required($column['name']);
             $show = Gen::show($column['name']);
 
             $column['_insert'] = $insert;
-            $column['_update'] = $update;
+            $column['_update'] = true;
             $column['_list'] = $list;
             $column['_select'] = $select;
             $column['_query'] = $query;
-            $column['_required'] = $required;
+            $column['_required'] = $column['notnull'];
             $column['_show'] = $show;
             $column['_validate'] = $validate;
             $column['dict_type_id'] = null;
@@ -246,17 +243,6 @@ class Gen
         }
 
         return $r;
-    }
-
-    /**
-     * 是否必填
-     *
-     * @param string $name
-     * @return bool
-     */
-    public static function required(string $name): bool
-    {
-        return !in_array($name, ['id', 'created_at', 'updated_at']);
     }
 
     /**
