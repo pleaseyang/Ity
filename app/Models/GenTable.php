@@ -220,7 +220,7 @@ class GenTable extends Model
                 "'$column->_validate'",
             ];
             if ($column->dict_type_id) {
-                array_push($rule, "Rule::exists('dict_data')->where('dict_type_id', $column->dict_type_id)->where('status', 1)");
+                array_push($rule, "Rule::exists('dict_data', 'value')->where('dict_type_id', $column->dict_type_id)->where('status', 1)");
             }
             if ($column->_unique) {
                 array_push($rule, "Rule::unique('$tableName', '$column->name')");
@@ -269,7 +269,7 @@ class GenTable extends Model
                 "'$column->_validate'",
             ];
             if ($column->dict_type_id) {
-                array_push($rule, "Rule::exists('dict_data')->where('dict_type_id', $column->dict_type_id)->where('status', 1)");
+                array_push($rule, "Rule::exists('dict_data', 'value')->where('dict_type_id', $column->dict_type_id)->where('status', 1)");
             }
             if ($column->_unique) {
                 array_push($rule, "Rule::unique('$tableName', '$column->name')->ignore(" . '$' . $primary->name . ")");
