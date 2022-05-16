@@ -325,7 +325,7 @@ class GenTable extends Model
         $model = str_replace([
             '{{className}}', '{{fillable}}', '{{singular}}', '{{where}}', '{{select}}', '{{tableName}}', '{{primaryKey}}', '{{keyType}}', '{{timestamps}}'
         ], [
-            $className, $fillable, $singular, $where, $selectDbColumns, $tableName, $primary->name, $primary->type === 'integer' ? 'int' : 'string', $timestamps
+            $className, $fillable, $singular, $where, $selectDbColumns, $tableName, $primary->name, $primary->type === 'integer' ? 'int' : 'string', $timestamps ? 'true' : 'false'
         ], GenTable::getStub('Model'));
         $path = "php/app/Models/{$className}.php";
         Storage::disk('codes')->put($path, $model);
