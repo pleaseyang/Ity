@@ -27,7 +27,7 @@ class GenTableTest extends TestCase
 
     public function testSetDict()
     {
-        $m = GenTableColumn::where('id', 57)->first();
+        $m = GenTableColumn::where('name', 'sex')->first();
         $d = DictType::where('type', 'sex')->first();
         $m->setDict($d);
         dd($m);
@@ -35,9 +35,22 @@ class GenTableTest extends TestCase
 
     public function testSetType()
     {
-        $m = GenTableColumn::where('id', 56)->first();
+        $m = GenTableColumn::where('name', 'avatar')->first();
         $m->setType('file');
-        $m = GenTableColumn::where('id', 58)->first();
+        $m = GenTableColumn::where('name', 'content')->first();
         $m->setType('editor');
+    }
+
+    public function testGenTest()
+    {
+        GenTable::importTable('test_db');
+        $m = GenTableColumn::where('name', 'sex')->first();
+        $d = DictType::where('type', 'sex')->first();
+        $m->setDict($d);
+        $m = GenTableColumn::where('name', 'avatar')->first();
+        $m->setType('file');
+        $m = GenTableColumn::where('name', 'content')->first();
+        $m->setType('editor');
+        dd(GenTable::gen('test_db', 0, '小学生'));
     }
 }

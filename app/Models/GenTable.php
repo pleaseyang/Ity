@@ -328,7 +328,8 @@ class GenTable extends Model
         $selectDbColumns = $columns->pluck('name')
             ->map(fn(string $name): string => "'$name'")
             ->implode(', ');
-        $timestamps = $columns->has([Model::CREATED_AT, Model::UPDATED_AT]);
+        $columnNameList = $columns->pluck('name')->toArray();
+        $timestamps = in_array(Model::CREATED_AT, $columnNameList) && in_array(Model::UPDATED_AT, $columnNameList);
         $sort = $timestamps ? Model::CREATED_AT : $primary->name;
 
         $model = str_replace([
