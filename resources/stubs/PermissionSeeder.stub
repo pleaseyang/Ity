@@ -11,7 +11,7 @@ class {{className}}PermissionSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     * php artisan db:seed --class={{className}}Seeder
+     * php artisan db:seed --class={{className}}PermissionSeeder
      *
      * @return void
      */
