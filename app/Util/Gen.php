@@ -25,7 +25,6 @@ class Gen
     const TYPE_INPUT_TEXTAREA = 'textarea';
     const TYPE_SELECT = 'select';
     const TYPE_RADIO = 'radio';
-    const TYPE_CHECKOUT = 'checkout';
     const TYPE_DATE = 'date';
     const TYPE_FILE = 'file';
     const TYPE_EDITOR = 'editor';
@@ -317,7 +316,6 @@ class Gen
                 ['name' => '文本域', 'value' => Gen::TYPE_INPUT_TEXTAREA],
                 ['name' => '下拉框', 'value' => Gen::TYPE_SELECT],
                 ['name' => '单选框', 'value' => Gen::TYPE_RADIO],
-                ['name' => '多选框', 'value' => Gen::TYPE_CHECKOUT],
                 ['name' => '日期控件', 'value' => Gen::TYPE_DATE],
                 ['name' => '上传控件', 'value' => Gen::TYPE_FILE],
                 ['name' => '富文本', 'value' => Gen::TYPE_EDITOR],

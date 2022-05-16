@@ -144,10 +144,10 @@ class GenTableColumn extends Model
         $this->_show = $type;
         if (in_array($type, [Gen::TYPE_FILE, Gen::TYPE_EDITOR])) {
             $this->_select = false;
+            $this->_validate = 'string';
+            $this->dict_type_id = null;
+            $this->_unique = false;
         }
-        $this->_validate = 'string';
-        $this->dict_type_id = null;
-        $this->_unique = null;
         $this->save();
         return $this;
     }
