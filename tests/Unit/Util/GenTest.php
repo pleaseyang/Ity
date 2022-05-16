@@ -20,7 +20,7 @@ class GenTest extends TestCase
 
     public function testGetTableConfig()
     {
-        dd(Gen::getTableConfig('users_copy1'));
+        dd(Gen::getTableConfig('users_copy'));
     }
 
     public function testColumnMethodAndType()

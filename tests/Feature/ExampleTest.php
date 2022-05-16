@@ -22,9 +22,9 @@ class ExampleTest extends TestCase
 
     public function testValidateSize()
     {
-        $data = ['name' => '1.00'];
+        $data = ['name' => '2020-01-02 00:23:21'];
 
-        $validator = Validator::make($data, ['name' => 'integer']);
+        $validator = Validator::make($data, ['name' => 'date']);
 
         if ($validator->fails()) {
             dd($validator->errors()->toArray());

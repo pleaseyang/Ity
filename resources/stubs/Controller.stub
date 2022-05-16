@@ -1,19 +1,18 @@
 <?php
 
-namespace App\Http\Controllers\{{module}};
+namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\{{module}}\{{model}}\GetListRequest;
-use App\Http\Requests\{{module}}\{{model}}\IdRequest;
-use App\Http\Requests\{{module}}\{{model}}\CreateRequest;
-use App\Http\Requests\{{module}}\{{model}}\UpdateRequest;
+use App\Http\Requests\Admin\{{className}}\CreateRequest;
+use App\Http\Requests\Admin\{{className}}\GetListRequest;
+use App\Http\Requests\Admin\{{className}}\IdRequest;
+use App\Http\Requests\Admin\{{className}}\UpdateRequest;
 use App\Http\Response\ApiCode;
-use App\Models\{{model}};
+use App\Models\{{className}};
 use MarcinOrlowski\ResponseBuilder\ResponseBuilder;
 use Symfony\Component\HttpFoundation\Response;
-use Exception;
 
-class {{model}}Controller extends Controller
+class {{className}}Controller extends Controller
 {
     /**
      * 列表
@@ -26,7 +25,21 @@ class {{model}}Controller extends Controller
         $validated = $request->validated();
         return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
             ->withHttpCode(ApiCode::HTTP_OK)
-            ->withData({{model}}::getList($validated))
+            ->withData({{className}}::list($validated))
+            ->withMessage(__('message.common.search.success'))
+            ->build();
+    }
+
+    /**
+     * 下拉
+     *
+     * @return Response
+     */
+    public function select(): Response
+    {
+        return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
+            ->withHttpCode(ApiCode::HTTP_OK)
+            ->withData({{className}}::selectAll())
             ->withMessage(__('message.common.search.success'))
             ->build();
     }
@@ -40,16 +53,15 @@ class {{model}}Controller extends Controller
     public function info(IdRequest $request): Response
     {
         $validated = $request->validated();
-        $model = {{model}}::find($validated['id']);
         return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
             ->withHttpCode(ApiCode::HTTP_OK)
-            ->withData($model)
+            ->withData({{className}}::find($validated['id']))
             ->withMessage(__('message.common.search.success'))
             ->build();
     }
 
     /**
-     * 添加
+     * 创建
      *
      * @param CreateRequest $request
      * @return Response
@@ -57,16 +69,15 @@ class {{model}}Controller extends Controller
     public function create(CreateRequest $request): Response
     {
         $validated = $request->validated();
-        $model = {{model}}::create($validated);
         return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
             ->withHttpCode(ApiCode::HTTP_OK)
-            ->withData($model)
+            ->withData({{className}}::create($validated))
             ->withMessage(__('message.common.create.success'))
             ->build();
     }
 
     /**
-     * 编辑
+     * 更新
      *
      * @param UpdateRequest $request
      * @return Response
@@ -74,18 +85,12 @@ class {{model}}Controller extends Controller
     public function update(UpdateRequest $request): Response
     {
         $validated = $request->validated();
-        $model = {{model}}::find($validated['id']);
-        if ($model) {
-            $model->update($validated);
-            return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
-                ->withHttpCode(ApiCode::HTTP_OK)
-                ->withData($model)
-                ->withMessage(__('message.common.update.success'))
-                ->build();
-        }
-        return ResponseBuilder::asError(ApiCode::HTTP_BAD_REQUEST)
-            ->withHttpCode(ApiCode::HTTP_BAD_REQUEST)
-            ->withMessage(__('message.common.update.fail'))
+        $model = {{className}}::find($validated['id']);
+        $model->update($validated);
+        return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
+            ->withHttpCode(ApiCode::HTTP_OK)
+            ->withData($model)
+            ->withMessage(__('message.common.update.success'))
             ->build();
     }
 
@@ -94,23 +99,14 @@ class {{model}}Controller extends Controller
      *
      * @param IdRequest $request
      * @return Response
-     * @throws Exception
      */
     public function delete(IdRequest $request): Response
     {
         $validated = $request->validated();
-        $model = {{model}}::find($validated['id']);
-        try {
-            $model->delete();
-            return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
-                ->withHttpCode(ApiCode::HTTP_OK)
-                ->withMessage(__('message.common.delete.success'))
-                ->build();
-        } catch (Exception $e) {
-            return ResponseBuilder::asError(ApiCode::HTTP_BAD_REQUEST)
-                ->withHttpCode(ApiCode::HTTP_BAD_REQUEST)
-                ->withMessage($e->getMessage())
-                ->build();
-        }
+        {{className}}::where('id', $validated['id'])->delete();
+        return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
+            ->withHttpCode(ApiCode::HTTP_OK)
+            ->withMessage(__('message.common.delete.success'))
+            ->build();
     }
 }

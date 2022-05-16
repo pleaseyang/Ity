@@ -113,7 +113,24 @@ class Gen
 
         $columns = $info['columns'];
 
-        $columnsConfigData = array_map(function (array $column) {
+        $uniques = array_values(array_map(function (array $column) {
+            return $column['columns'][0];
+        }, array_filter($info['indexes'], function (array $index) {
+            return count($index['columns']) === 1 && Str::of($index['name'])->endsWith('_unique');
+        })));
+
+        $foreignKeys = array_values(array_map(function (array $foreign) {
+            return [
+                'local_column' => $foreign['local_columns'][0],
+                '_foreign' => true,
+                '_foreign_table' => $foreign['unqualified_foreign_table_name'],
+                '_foreign_column' => $foreign['unqualified_foreign_columns'][0],
+            ];
+        }, array_filter($info['foreign_keys'], function (array $index) {
+            return count($index['local_columns']) === 1 && count($index['unqualified_foreign_columns']) === 1;
+        })));
+
+        $columnsConfigData = array_map(function (array $column) use ($uniques, $foreignKeys) {
             $insert = true;
             $update = true;
             $list = true;
@@ -121,24 +138,40 @@ class Gen
             // 如果是自增主键
             if ($column['primary'] && $column['autoincrement']) {
                 $insert = false;
-                $update = false;
+                $update = true;
                 $list = false;
                 $select = false;
             }
 
             $query = Gen::query($column['type']);
+            $validate = Gen::validate($column['type']);
             $required = Gen::required($column['name']);
             $show = Gen::show($column['name']);
-            $dictionary = '';
 
-            $column['insert'] = $insert;
-            $column['update'] = $update;
-            $column['list'] = $list;
-            $column['select'] = $select;
-            $column['query'] = $query;
-            $column['required'] = $required;
-            $column['show'] = $show;
-            $column['dictionary'] = $dictionary;
+            $column['_insert'] = $insert;
+            $column['_update'] = $update;
+            $column['_list'] = $list;
+            $column['_select'] = $select;
+            $column['_query'] = $query;
+            $column['_required'] = $required;
+            $column['_show'] = $show;
+            $column['_validate'] = $validate;
+            $column['dict_type_id'] = null;
+            $column['_unique'] = in_array($column['name'], $uniques);
+
+            $column['_foreign'] = false;
+            $column['_foreign_table'] = null;
+            $column['_foreign_column'] = null;
+
+            $foreign = array_filter($foreignKeys, function (array $fk) use ($column) {
+               return $fk['local_column'] === $column['name'];
+            });
+
+            if (count($foreign) === 1) {
+                $column['_foreign'] = true;
+                $column['_foreign_table'] = $foreign[0]['_foreign_table'];
+                $column['_foreign_column'] = $foreign[0]['_foreign_column'];
+            }
 
             return $column;
         }, $columns);
@@ -146,6 +179,43 @@ class Gen
         $info['columns'] = $columnsConfigData;
 
         return $info;
+    }
+
+    /**
+     * 验证方式
+     *
+     * @param string $type
+     * @return string
+     */
+    public static function validate(string $type): string
+    {
+        $types = [
+            'integer' => [
+                'integer', 'bigint'
+            ],
+            'string' => [
+                'string', 'text'
+            ],
+            'numeric' => [
+                'decimal', 'float'
+            ],
+            'date' => [
+                'datetime', 'date'
+            ],
+            'boolean' => [
+                'boolean'
+            ]
+        ];
+
+        $r = 'string';
+        foreach ($types as $select => $array) {
+            if (in_array($type, $array)) {
+                $r = $select;
+                break;
+            }
+        }
+
+        return $r;
     }
 
     /**
