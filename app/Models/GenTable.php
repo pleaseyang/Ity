@@ -321,11 +321,12 @@ class GenTable extends Model
             ->map(fn(string $name): string => "'$name'")
             ->implode(', ');
         $timestamps = $columns->has([Model::CREATED_AT, Model::UPDATED_AT]);
+        $sort = $timestamps ? Model::CREATED_AT : $primary->name;
 
         $model = str_replace([
-            '{{className}}', '{{fillable}}', '{{singular}}', '{{where}}', '{{select}}', '{{tableName}}', '{{primaryKey}}', '{{keyType}}', '{{timestamps}}'
+            '{{className}}', '{{fillable}}', '{{singular}}', '{{where}}', '{{select}}', '{{tableName}}', '{{primaryKey}}', '{{keyType}}', '{{timestamps}}', '{{sort}}'
         ], [
-            $className, $fillable, $singular, $where, $selectDbColumns, $tableName, $primary->name, $primary->type === 'integer' ? 'int' : 'string', $timestamps ? 'true' : 'false'
+            $className, $fillable, $singular, $where, $selectDbColumns, $tableName, $primary->name, $primary->type === 'integer' ? 'int' : 'string', $timestamps ? 'true' : 'false', $sort
         ], GenTable::getStub('Model'));
         $path = "php/app/Models/{$className}.php";
         Storage::disk('codes')->put($path, $model);

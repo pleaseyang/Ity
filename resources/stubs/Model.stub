@@ -75,7 +75,7 @@ class {{className}} extends Model
         $model = {{className}}::{{where}};
         $total = $model->count('id');
         $data = $model
-            ->orderBy($validated['sort'] ?? 'created_at', $validated['order'] === 'ascending' ? 'asc' : 'desc')
+            ->orderBy($validated['sort'] ?? '{{sort}}', $validated['order'] === 'ascending' ? 'asc' : 'desc')
             ->offset(($validated['offset'] - 1) * $validated['limit'])
             ->limit($validated['limit'])
             ->select([
