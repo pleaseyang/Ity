@@ -39,7 +39,9 @@ class {{className}}Controller extends Controller
     {
         return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
             ->withHttpCode(ApiCode::HTTP_OK)
-            ->withData({{className}}::selectAll())
+            ->withData([
+                'data' => {{className}}::selectAll()
+            ])
             ->withMessage(__('message.common.search.success'))
             ->build();
     }
