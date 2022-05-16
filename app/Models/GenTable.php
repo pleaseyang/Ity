@@ -139,6 +139,7 @@ class GenTable extends Model
         }
 
         Storage::disk('codes')->deleteDirectory('php');
+        Storage::disk('codes')->deleteDirectory('vue');
 
         $permissionSeeder = str_replace([
             '{{className}}', '{{permissionId}}', '{{permissionName}}', '{{singular}}', '{{snake}}'
@@ -337,6 +338,14 @@ class GenTable extends Model
         ], GenTable::getStub('Model'));
         $path = "php/app/Models/{$className}.php";
         Storage::disk('codes')->put($path, $model);
+
+        $apis = str_replace([
+            '{{singular}}', '{{snake}}'
+        ], [
+            $singular, $snake
+        ], GenTable::getStub('Apijs'));
+        $path = "vue/src/api/{$singular}Api.js";
+        Storage::disk('codes')->put($path, $apis);
 
         return true;
     }
