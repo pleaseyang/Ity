@@ -17,6 +17,34 @@ class {{className}} extends Model
     use HasFactory, LogsActivity;
 
     /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = '{{tableName}}';
+
+    /**
+     * The primary key for the model.
+     *
+     * @var string
+     */
+    protected $primaryKey = '{{primaryKey}}';
+
+    /**
+     * The "type" of the primary key ID.
+     *
+     * @var string
+     */
+    protected $keyType = '{{keyType}}';
+
+    /**
+     * Indicates if the model should be timestamped.
+     *
+     * @var bool
+     */
+    public $timestamps = {{timestamps}};
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var array
