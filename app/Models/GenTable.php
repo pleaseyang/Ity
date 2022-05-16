@@ -309,6 +309,10 @@ class GenTable extends Model
             } else if ($column->_query === Gen::SELECT_BETWEEN) {
                 $where = 'when(isset($validated[\'' . $column->name . '_start\']) && isset($validated[\'' . $column->name . '_end\']), function (Builder $query) use ($validated): Builder {
             return $query->whereBetween(\'' . $column->name . '\', [$validated[\'' . $column->name . '_start' . '\'], $validated[\'' . $column->name . '_end' . '\']]);
+        })->when(isset($validated[\'' . $column->name . '_start\']) && !isset($validated[\'' . $column->name . '_end\']), function (Builder $query) use ($validated): Builder {
+            return $query->where(\'' . $column->name . '\', \'>=\', $validated[\'' . $column->name . '_start' . '\']);
+        })->when(!isset($validated[\'' . $column->name . '_start\']) && isset($validated[\'' . $column->name . '_end\']), function (Builder $query) use ($validated): Builder {
+            return $query->where(\'' . $column->name . '\', \'<=\', $validated[\'' . $column->name . '_end' . '\']);
         })';
             } else {
                 $where = 'when(isset($validated[\'' . $column->name . '\'])' . $when . ', function (Builder $query) use ($validated): Builder {
