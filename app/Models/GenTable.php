@@ -325,7 +325,7 @@ class GenTable extends Model
             }
             return $where;
         })->implode('->');
-        $selectDbColumns = $columns->pluck('name')
+        $selectDbColumns = $columns->where('_list', '=', true)->pluck('name')
             ->map(fn(string $name): string => "'$name'")
             ->implode(', ');
         $columnNameList = $columns->pluck('name')->toArray();
