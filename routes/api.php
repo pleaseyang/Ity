@@ -121,6 +121,7 @@ Route::middleware(['lang'])->prefix('admin')->name('admin.')->group(function () 
 
             Route::post('dictData/list', [DictDataController::class, 'list'])->middleware('permission:dict');
             Route::post('dictData', [DictDataController::class, 'info'])->middleware('permission:dict');
+            Route::post('dictData/select', [DictDataController::class, 'select']);
             Route::post('dictData/create', [DictDataController::class, 'create'])->middleware('permission:dict');
             Route::post('dictData/update', [DictDataController::class, 'update'])->middleware('permission:dict');
             Route::post('dictData/delete', [DictDataController::class, 'delete'])->middleware('permission:dict');

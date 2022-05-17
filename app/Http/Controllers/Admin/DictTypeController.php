@@ -8,6 +8,7 @@ use App\Http\Requests\Admin\DictType\GetListRequest;
 use App\Http\Requests\Admin\DictType\IdRequest;
 use App\Http\Requests\Admin\DictType\UpdateRequest;
 use App\Http\Response\ApiCode;
+use App\Models\DictData;
 use App\Models\DictType;
 use MarcinOrlowski\ResponseBuilder\ResponseBuilder;
 use Symfony\Component\HttpFoundation\Response;
@@ -29,6 +30,7 @@ class DictTypeController extends Controller
             ->withMessage(__('message.common.search.success'))
             ->build();
     }
+
     /**
      * 下拉
      *
@@ -70,6 +72,7 @@ class DictTypeController extends Controller
     public function create(CreateRequest $request): Response
     {
         $validated = $request->validated();
+        DictData::forgetRedis();
         return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
             ->withHttpCode(ApiCode::HTTP_OK)
             ->withData(DictType::create($validated))
@@ -88,6 +91,7 @@ class DictTypeController extends Controller
         $validated = $request->validated();
         $model = DictType::find($validated['id']);
         $model->update($validated);
+        DictData::forgetRedis();
         return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
             ->withHttpCode(ApiCode::HTTP_OK)
             ->withData($model)
@@ -105,6 +109,7 @@ class DictTypeController extends Controller
     {
         $validated = $request->validated();
         DictType::whereId($validated['id'])->delete();
+        DictData::forgetRedis();
         return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
             ->withHttpCode(ApiCode::HTTP_OK)
             ->withMessage(__('message.common.delete.success'))

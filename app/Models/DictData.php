@@ -5,6 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
+use Psr\SimpleCache\InvalidArgumentException;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -105,5 +108,41 @@ class DictData extends Model
                 'default' => 0,
                 'updated_at' => now()
             ]);
+    }
+
+    public static function selectAll(): Collection
+    {
+        try {
+            $data = Cache::store('redis')->get('DictData', collect([]));
+        } catch (InvalidArgumentException) {
+            $data = collect([]);
+        }
+        if ($data->count() === 0) {
+            $data = DictData::leftJoin(
+                'dict_types',
+                'dict_types.id',
+                '=',
+                'dict_data.dict_type_id'
+            )->where(
+                'dict_types.status', '=', 1
+            )->where(
+                'dict_data.status', '=', 1
+            )->select([
+                'dict_data.dict_type_id',
+                'dict_data.sort',
+                'dict_data.label',
+                'dict_data.value',
+                'dict_data.list_class',
+                'dict_data.default'
+            ])->get();
+            Cache::store('redis')->put('DictData', $data);
+        }
+
+        return $data;
+    }
+
+    public static function forgetRedis(): void
+    {
+        Cache::store('redis')->forget('DictData');
     }
 }

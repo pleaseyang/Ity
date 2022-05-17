@@ -30,6 +30,17 @@ class DictDataController extends Controller
             ->build();
     }
 
+    public function select(): Response
+    {
+        return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
+            ->withHttpCode(ApiCode::HTTP_OK)
+            ->withData([
+                'select' => DictData::selectAll()
+            ])
+            ->withMessage(__('message.common.search.success'))
+            ->build();
+    }
+
     /**
      * 详情
      *
@@ -60,6 +71,7 @@ class DictDataController extends Controller
         if ($default) {
             DictData::setDefault($data);
         }
+        DictData::forgetRedis();
         return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
             ->withHttpCode(ApiCode::HTTP_OK)
             ->withData($data)
@@ -82,6 +94,7 @@ class DictDataController extends Controller
         if ($default) {
             DictData::setDefault($model);
         }
+        DictData::forgetRedis();
         return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
             ->withHttpCode(ApiCode::HTTP_OK)
             ->withData($model)
@@ -99,6 +112,7 @@ class DictDataController extends Controller
     {
         $validated = $request->validated();
         DictData::whereId($validated['id'])->delete();
+        DictData::forgetRedis();
         return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
             ->withHttpCode(ApiCode::HTTP_OK)
             ->withMessage(__('message.common.delete.success'))
