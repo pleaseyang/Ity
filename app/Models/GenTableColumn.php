@@ -148,6 +148,9 @@ class GenTableColumn extends Model
             $this->_validate = 'string';
             $this->dict_type_id = null;
             $this->_unique = false;
+            if ($type === Gen::TYPE_EDITOR) {
+                $this->_list = false;
+            }
         }
         $this->save();
         return $this;
