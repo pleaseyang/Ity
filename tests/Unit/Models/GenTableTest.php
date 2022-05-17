@@ -48,6 +48,8 @@ class GenTableTest extends TestCase
         $d = DictType::where('type', 'sex')->first();
         $m->setDict($d);
         $m = GenTableColumn::where('name', 'avatar')->first();
+        $m->setType('image');
+        $m = GenTableColumn::where('name', 'dangan')->first();
         $m->setType('file');
         $m = GenTableColumn::where('name', 'content')->first();
         $m->setType('editor');

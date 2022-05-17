@@ -143,7 +143,7 @@ class GenTableColumn extends Model
     public function setType(string $type): GenTableColumn
     {
         $this->_show = $type;
-        if (in_array($type, [Gen::TYPE_FILE, Gen::TYPE_EDITOR])) {
+        if (in_array($type, [Gen::TYPE_FILE, Gen::TYPE_EDITOR, Gen::TYPE_IMAGE])) {
             $this->_select = false;
             $this->_validate = 'string';
             $this->dict_type_id = null;

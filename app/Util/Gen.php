@@ -27,6 +27,7 @@ class Gen
     const TYPE_RADIO = 'radio';
     const TYPE_DATE = 'date';
     const TYPE_FILE = 'file';
+    const TYPE_IMAGE = 'image';
     const TYPE_EDITOR = 'editor';
 
     /**
@@ -264,7 +265,10 @@ class Gen
                 '_at', '_time'
             ],
             Gen::TYPE_FILE => [
-                'pic', 'image', 'file'
+                'file'
+            ],
+            Gen::TYPE_IMAGE => [
+                'pic', 'image'
             ]
         ];
 
@@ -303,7 +307,8 @@ class Gen
                 ['name' => '下拉框', 'value' => Gen::TYPE_SELECT],
                 ['name' => '单选框', 'value' => Gen::TYPE_RADIO],
                 ['name' => '日期控件', 'value' => Gen::TYPE_DATE],
-                ['name' => '上传控件', 'value' => Gen::TYPE_FILE],
+                ['name' => '上传文件控件', 'value' => Gen::TYPE_FILE],
+                ['name' => '上传图片控件', 'value' => Gen::TYPE_IMAGE],
                 ['name' => '富文本', 'value' => Gen::TYPE_EDITOR],
             ]
         ];
