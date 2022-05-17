@@ -301,41 +301,44 @@ class GenTable extends Model
             ->map(fn(string $name): string => "'$name'")
             ->implode(', ');
 
-        $where = $columns->where('_select', '=', true)->map(function (GenTableColumn $column) {
+        $where = $columns->where('_select', '=', true)->map(function (GenTableColumn $column) use ($tableName) {
             $when = '';
             if ($column->_validate === 'integer') {
                 $when = ' && is_numeric($validated[\'' . $column->name . '\'])';
             }
             if ($column->_query === Gen::SELECT_LIKE) {
                 $where = 'when(isset($validated[\'' . $column->name . '\'])' . $when . ', function (Builder $query) use ($validated): Builder {
-            return $query->where(\'' . $column->name . '\', \'LIKE\', \'%\' . $validated[\'' . $column->name . '\'] . \'%\');
+            return $query->where(\'' . $tableName . '.' . $column->name . '\', \'LIKE\', \'%\' . $validated[\'' . $column->name . '\'] . \'%\');
         })';
             } else if ($column->_query === Gen::SELECT_BETWEEN) {
                 $where = 'when(isset($validated[\'' . $column->name . '_start\']) && isset($validated[\'' . $column->name . '_end\']), function (Builder $query) use ($validated): Builder {
-            return $query->whereBetween(\'' . $column->name . '\', [$validated[\'' . $column->name . '_start' . '\'], $validated[\'' . $column->name . '_end' . '\']]);
+            return $query->whereBetween(\'' . $tableName . '.' . $column->name . '\', [$validated[\'' . $column->name . '_start' . '\'], $validated[\'' . $column->name . '_end' . '\']]);
         })->when(isset($validated[\'' . $column->name . '_start\']) && !isset($validated[\'' . $column->name . '_end\']), function (Builder $query) use ($validated): Builder {
-            return $query->where(\'' . $column->name . '\', \'>=\', $validated[\'' . $column->name . '_start' . '\']);
+            return $query->where(\'' . $tableName . '.' . $column->name . '\', \'>=\', $validated[\'' . $column->name . '_start' . '\']);
         })->when(!isset($validated[\'' . $column->name . '_start\']) && isset($validated[\'' . $column->name . '_end\']), function (Builder $query) use ($validated): Builder {
-            return $query->where(\'' . $column->name . '\', \'<=\', $validated[\'' . $column->name . '_end' . '\']);
+            return $query->where(\'' . $tableName . '.' . $column->name . '\', \'<=\', $validated[\'' . $column->name . '_end' . '\']);
         })';
             } else {
                 $where = 'when(isset($validated[\'' . $column->name . '\'])' . $when . ', function (Builder $query) use ($validated): Builder {
-            return $query->where(\'' . $column->name . '\', \'' . $column->_query . '\', $validated[\'' . $column->name . '\']);
+            return $query->where(\'' . $tableName . '.' . $column->name . '\', \'' . $column->_query . '\', $validated[\'' . $column->name . '\']);
         })';
             }
             return $where;
         })->implode('->');
         $selectDbColumns = $columns->where('_list', '=', true)->pluck('name')
-            ->map(fn(string $name): string => "'$name'")
+            ->add($primary->name)
+            ->map(function (string $name) use ($tableName): string {
+                return  "'{$tableName}.{$name}'";
+            })
             ->implode(', ');
         $columnNameList = $columns->pluck('name')->toArray();
         $timestamps = in_array(Model::CREATED_AT, $columnNameList) && in_array(Model::UPDATED_AT, $columnNameList);
         $sort = $timestamps ? Model::CREATED_AT : $primary->name;
 
         $model = str_replace([
-            '{{className}}', '{{fillable}}', '{{singular}}', '{{where}}', '{{select}}', '{{tableName}}', '{{primaryKey}}', '{{keyType}}', '{{timestamps}}', '{{sort}}'
+            '{{className}}', '{{fillable}}', '{{singular}}', '{{where}}', '{{select}}', '{{tableName}}', '{{primaryKey}}', '{{keyType}}', '{{timestamps}}', '{{sort}}', '{{count}}'
         ], [
-            $className, $fillable, $singular, $where, $selectDbColumns, $tableName, $primary->name, $primary->type === 'integer' ? 'int' : 'string', $timestamps ? 'true' : 'false', $sort
+            $className, $fillable, $singular, $where, $selectDbColumns, $tableName, $primary->name, $primary->type === 'integer' ? 'int' : 'string', $timestamps ? 'true' : 'false', $sort, $tableName . '.' . $primary->name
         ], GenTable::getStub('Model'));
         $path = "php/app/Models/{$className}.php";
         Storage::disk('codes')->put($path, $model);

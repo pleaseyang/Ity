@@ -73,7 +73,7 @@ class {{className}} extends BaseModel
     public static function list(array $validated): array
     {
         $model = {{className}}::{{where}};
-        $total = $model->count('id');
+        $total = $model->count('{{count}}');
         $data = $model
             ->orderBy($validated['sort'] ?? '{{sort}}', $validated['order'] === 'ascending' ? 'asc' : 'desc')
             ->offset(($validated['offset'] - 1) * $validated['limit'])
