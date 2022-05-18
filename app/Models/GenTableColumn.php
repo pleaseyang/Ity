@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Util\Gen;
+use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\LogOptions;
@@ -36,6 +37,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property bool $_foreign 外键 1:是 0:否
  * @property string|null $_foreign_table 外键表
  * @property string|null $_foreign_column 外键字段
+ * @property string|null $_foreign_show 外键显示字段
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \Illuminate\Database\Eloquent\Collection|\Spatie\Activitylog\Models\Activity[] $activities
@@ -50,6 +52,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @method static \Illuminate\Database\Eloquent\Builder|GenTableColumn whereDictTypeId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|GenTableColumn whereForeign($value)
  * @method static \Illuminate\Database\Eloquent\Builder|GenTableColumn whereForeignColumn($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|GenTableColumn whereForeignShow($value)
  * @method static \Illuminate\Database\Eloquent\Builder|GenTableColumn whereForeignTable($value)
  * @method static \Illuminate\Database\Eloquent\Builder|GenTableColumn whereGenTableId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|GenTableColumn whereId($value)
@@ -84,7 +87,8 @@ class GenTableColumn extends Model
     protected $fillable = [
         'gen_table_id', 'name', 'type', 'precision', 'scale', 'notnull', 'primary', 'comment',
         'default', 'autoincrement', 'unsigned', '_insert', '_update', '_list', '_select', '_query',
-        '_required', '_show', 'dict_type_id', '_validate', '_unique', '_foreign', '_foreign_table', '_foreign_column'
+        '_required', '_show', 'dict_type_id', '_validate', '_unique', '_foreign', '_foreign_table', '_foreign_column',
+        '_foreign_show'
     ];
 
 
@@ -133,6 +137,7 @@ class GenTableColumn extends Model
         $this->_foreign = false;
         $this->_foreign_table = null;
         $this->_foreign_column = null;
+        $this->_foreign_show = null;
         $this->save();
         return $this;
     }
@@ -153,6 +158,33 @@ class GenTableColumn extends Model
             }
         }
         $this->save();
+        return $this;
+    }
+
+    /**
+     * 设置外键显示字段
+     *
+     * @param string[] $columns
+     * @return $this
+     * @throws Exception
+     */
+    public function setForeignShow(array $columns): GenTableColumn
+    {
+        if (!$this->_foreign) {
+            throw new Exception("不存在对应的主键");
+        }
+
+        $foreignColumns = Gen::getTableInfo($this->_foreign_table);
+        $foreignColumns = array_map(fn(array $column): string => $column['name'], $foreignColumns['columns']);
+        $errorColumns = array_filter($columns, fn(string $column): bool => !in_array($column, $foreignColumns));
+        if (count($errorColumns) > 0) {
+            $errorColumnString = implode(', ', $errorColumns);
+            throw new Exception("字段:$errorColumnString 不在 $this->_foreign_table 表内");
+        }
+
+        $this->_foreign_show = implode(',', $columns);
+        $this->save();
+
         return $this;
     }
 }

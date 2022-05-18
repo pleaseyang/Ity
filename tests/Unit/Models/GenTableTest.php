@@ -55,4 +55,10 @@ class GenTableTest extends TestCase
         $m->setType('editor');
         dd(GenTable::gen('test_db', 0, '小学生'));
     }
+
+    public function testSetForeignShow()
+    {
+        $m = GenTableColumn::where('name', 'admin_id')->first();
+        $m->setForeignShow(['name', 'type']);
+    }
 }

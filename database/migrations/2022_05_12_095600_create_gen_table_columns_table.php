@@ -39,6 +39,7 @@ return new class extends Migration
             $table->tinyInteger('_foreign')->comment('外键 1:是 0:否');
             $table->string('_foreign_table', 100)->nullable()->comment('外键表');
             $table->string('_foreign_column', 100)->nullable()->comment('外键字段');
+            $table->string('_foreign_show', 500)->nullable()->comment('外键显示字段');
             $table->timestamps();
             $table->foreign('gen_table_id')
                 ->references('id')
