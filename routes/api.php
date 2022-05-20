@@ -106,6 +106,9 @@ Route::middleware(['lang'])->prefix('admin')->name('admin.')->group(function () 
                 ->middleware('permission:file.deleteDirectory');
             Route::post('file/upload', [FileSystemController::class, 'upload'])->middleware('permission:file.upload');
             Route::post('file/uploadUnPermission', [FileSystemController::class, 'upload']);
+            Route::post('file/uploadImage', [FileSystemController::class, 'uploadImage']);
+            Route::post('file/uploadFile', [FileSystemController::class, 'uploadFile']);
+            Route::post('file/removeFile', [FileSystemController::class, 'removeFile']);
             Route::post('file/download', [FileSystemController::class, 'download'])
                 ->middleware('permission:file.download');
             Route::post('file/delete', [FileSystemController::class, 'delete'])->middleware('permission:file.delete');
