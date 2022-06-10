@@ -328,7 +328,7 @@ class GenTable extends Model
         $selectDbColumns = $columns->where('_list', '=', true)->pluck('name')
             ->add($primary->name)
             ->map(function (string $name) use ($tableName): string {
-                return  "'{$tableName}.{$name}'";
+                return "'{$tableName}.{$name}'";
             })
             ->implode(', ');
         $columnNameList = $columns->pluck('name')->toArray();
@@ -351,6 +351,430 @@ class GenTable extends Model
         $path = "vue/src/api/{$singular}Api.js";
         Storage::disk('codes')->put($path, $apis);
 
+        $form = $selectColumns->map(function (GenTableColumn $genTableColumn): string {
+            if ($genTableColumn->_show === Gen::TYPE_INPUT_TEXT) {
+                $form = '<el-form-item label="' . $genTableColumn->comment . '" prop="' . $genTableColumn->name . '">
+          <el-input v-model="form.' . $genTableColumn->name . '" />
+        </el-form-item>';
+                if ($genTableColumn->_validate === 'boolean') {
+                    $label = Str::of($genTableColumn->comment)->explode(' ')->first();
+                    $form = '<el-form-item label="' . $label . '" prop="' . $genTableColumn->name . '">
+          <el-select v-model="form.' . $genTableColumn->name . '" clearable>
+            <el-option :key="1" :value="1" :label="$t(\'common.yes\')" />
+            <el-option :key="0" :value="0" :label="$t(\'common.no\')" />
+          </el-select>
+        </el-form-item>';
+                }
+            } elseif ($genTableColumn->_foreign) {
+                $vFor = Str::of($genTableColumn->_foreign_table)->singular()->camel()->append('SelectData')->toString();
+                $label = Str::of($genTableColumn->_foreign_show)->explode(',')->first();
+                $form = '<el-form-item label="' . $genTableColumn->comment . '" prop="' . $genTableColumn->name . '">
+          <el-select v-model="form.' . $genTableColumn->name . '" clearable filterable>
+            <el-option
+              v-for="item in ' . $vFor . '"
+              :key="item.' . $genTableColumn->_foreign_column . '"
+              :value="item.' . $genTableColumn->_foreign_column . '"
+              :label="item.' . $label . '"
+            />
+          </el-select>
+        </el-form-item>';
+            } elseif (is_int($genTableColumn->dict_type_id)) {
+                $form = '<el-form-item label="' . $genTableColumn->comment . '" prop="' . $genTableColumn->name . '">
+          <el-select v-model="form.' . $genTableColumn->name . '" clearable filterable>
+            <el-option
+              v-for="item in dict.filter((e) => e.dict_type_id === ' . $genTableColumn->dict_type_id . ')"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </el-form-item>';
+            } elseif ($genTableColumn->_show === Gen::TYPE_DATE) {
+                $form = '<el-form-item label="' . $genTableColumn->comment . '" prop="' . $genTableColumn->name . '">
+          <el-date-picker
+            v-model="form.' . $genTableColumn->name . '"
+            type="datetime"
+            format="yyyy-MM-dd HH:mm:ss"
+            time-arrow-control
+          />
+        </el-form-item>';
+            } else {
+                throw new Exception('字段[' . $genTableColumn->name . ']未记录， 暂不支持生成搜索条件');
+            }
+
+            return $form;
+        })->implode("\n        ");
+
+        $listColumns = $columns->where('_list', '=', true)->values();
+        $table = $listColumns->map(function (GenTableColumn $genTableColumn): string {
+            if ($genTableColumn->_show === Gen::TYPE_INPUT_TEXT || $genTableColumn->_show === Gen::TYPE_DATE) {
+                $table = '<el-table-column prop="' . $genTableColumn->name . '" label="' . $genTableColumn->comment . '" sortable />';
+                if ($genTableColumn->_validate === 'boolean') {
+                    $label = Str::of($genTableColumn->comment)->explode(' ')->first();
+                    $table = '<el-table-column prop="' . $genTableColumn->name . '" label="' . $label . '" sortable>
+          <template scope="scope">
+            <el-tag v-if="scope.row.' . $genTableColumn->name . '" type="success">{{ $t(\'common.yes\') }}</el-tag>
+            <el-tag v-else type="danger">{{ $t(\'common.no\') }}</el-tag>
+          </template>
+        </el-table-column>';
+                }
+            } elseif ($genTableColumn->_foreign) {
+                $vFor = Str::of($genTableColumn->_foreign_table)->singular()->camel()->append('SelectData')->toString();
+                $label = Str::of($genTableColumn->_foreign_show)->explode(',')->first();
+                $table = '<el-table-column prop="' . $genTableColumn->name . '" label="' . $genTableColumn->comment . '" sortable>
+          <template scope="scope">
+            <ForeignString v-if="' . $vFor . '.length > 0" column="' . $genTableColumn->_foreign_column . '" show="' . $label . '" :data="' . $vFor . '" :value="scope.row.' . $genTableColumn->name . '" />
+          </template>
+        </el-table-column>';
+            } elseif (is_int($genTableColumn->dict_type_id)) {
+                $table = '<el-table-column prop="' . $genTableColumn->name . '" label="' . $genTableColumn->comment . '" sortable>
+          <template scope="scope">
+            <DictTag v-if="dict.length > 0" :dict-data="dict" :dict-type-id="' . $genTableColumn->dict_type_id . '" :value="scope.row.' . $genTableColumn->name . '" />
+          </template>
+        </el-table-column>';
+            } elseif ($genTableColumn->_show === Gen::TYPE_IMAGE) {
+                $table = '<el-table-column prop="' . $genTableColumn->name . '" label="' . $genTableColumn->comment . '" sortable>
+          <template scope="scope">
+            <el-image class="table-image table-image-50" :src="scope.row.' . $genTableColumn->name . '" :preview-src-list="[scope.row.' . $genTableColumn->name . ']">
+              <div slot="error" class="image-error-slot">
+                <i class="el-icon-picture-outline" />
+              </div>
+            </el-image>
+          </template>
+        </el-table-column>';
+            } elseif ($genTableColumn->_show === Gen::TYPE_FILE) {
+                $table = '<el-table-column prop="' . $genTableColumn->name . '" label="' . $genTableColumn->comment . '" sortable>
+          <template scope="scope">
+            <el-link v-if="scope.row.' . $genTableColumn->name . '" icon="el-icon-download" :underline="false" :href="scope.row.' . $genTableColumn->name . '" target="_blank">{{ $t(\'common.download\') }}</el-link>
+          </template>
+        </el-table-column>';
+            } else {
+                throw new Exception('字段[' . $genTableColumn->name . ']未记录， 暂不支持生成表格数据');
+            }
+
+            return $table;
+        })->implode("\n        ");
+
+        $dataForm = $selectColumns->map(function (GenTableColumn $genTableColumn): string {
+            return "$genTableColumn->name: ''";
+        })->implode(",\n        ");
+
+        $components = [];
+        $components[] = "create: () => import('@/views/testDb/create')";
+        $components[] = "update: () => import('@/views/testDb/update')";
+        $dataFormColumns = [];
+        $mounted = [];
+        $methods = [];
+        $import = [];
+        $import[] = "import { {$singular}Delete, {$singular}List } from '@/api/{$singular}Api'";
+        if ($listColumns->where('dict_type_id', '=', true)->count() > 0) {
+            $components[] = "DictTag: () => import('@/components/DictTag')";
+            $dataFormColumns[] = 'dict: []';
+            $mounted[] = "this.getDictData()";
+            $methods[] = 'getDictData() {
+      dictDataSelect().then(response => {
+        const { select = [] } = response.data
+        this.dict = select
+      })
+    }';
+            $import[] = "import { dictDataSelect } from '@/api/dict'";
+        }
+        $foreignColumns = $listColumns->where('_foreign', '=', true)->values();
+        if ($foreignColumns->count() > 0) {
+            $components[] = "ForeignString: () => import('@/components/Foreign/string')";
+            $dataFormColumns = $foreignColumns->map(function (GenTableColumn $genTableColumn): string {
+                return Str::of($genTableColumn->_foreign_table)->singular()->camel()->append('SelectData: []')->toString();
+            })->merge($dataFormColumns);
+            $mounted = $foreignColumns->map(function (GenTableColumn $genTableColumn): string {
+                return 'this.get' . Str::of($genTableColumn->_foreign_table)->singular()->studly()->append('Select()')->toString();
+            })->merge($mounted);
+            $methods = $foreignColumns->map(function (GenTableColumn $genTableColumn): string {
+                $name = Str::of($genTableColumn->_foreign_table)->singular()->studly()->toString();
+                $method = Str::of($genTableColumn->_foreign_table)->singular()->camel()->toString();
+                return 'get' . $name . 'Select() {
+      ' . $method . 'Select().then(response => {
+        const { select = [] } = response.data
+        this.' . $method . 'SelectData = select
+      })
+    }';
+            })->merge($methods);
+            $import = $foreignColumns->map(function (GenTableColumn $genTableColumn): string {
+                $name = Str::of($genTableColumn->_foreign_table)->singular()->camel()->toString();
+                return "import { {$name}Select } from '@/api/{$name}Api'";
+            })->merge($import);
+        }
+        $dataFormColumns = $dataFormColumns->implode(",\n      ");
+        $components = implode(",\n    ", $components);
+        $mounted = $mounted->implode("\n    ");
+        $methods = $methods->implode(",\n    ");
+        $import = $import->implode("\n");
+
+        $indexVue = str_replace([
+            '{{form}}', '{{table}}', '{{name}}', '{{dataForm}}', '{{primaryId}}', '{{components}}', '{{dataFormColumns}}', '{{mounted}}', '{{methods}}', '{{import}}', '{{singular}}', '{{sort}}'
+        ], [
+            $form, $table, $singular . '.' . $snake, $dataForm, $primary->name, $components, $dataFormColumns, $mounted, $methods, $import, $singular, $sort
+        ], GenTable::getStub('IndexVue'));
+        $path = "vue/src/views/{$singular}/index.vue";
+        Storage::disk('codes')->put($path, $indexVue);
+
+        $createColumns = $columns->where('_insert', '=', true)->values();
+        $createForm = $createColumns->map(function (GenTableColumn $genTableColumn): string {
+            $required = $genTableColumn->_required ? 'class="form-item-required" ' : '';
+            if ($genTableColumn->_show === Gen::TYPE_INPUT_TEXT) {
+                if ($genTableColumn->_validate === 'string') {
+                    $form = '<el-form-item label="' . $genTableColumn->comment . '" prop="' . $genTableColumn->name . '" ' . $required . ':error="error.' . $genTableColumn->name . '">
+        <el-input v-model="form.' . $genTableColumn->name . '" clearable />
+      </el-form-item>';
+                } elseif ($genTableColumn->_validate === 'integer') {
+                    $form = '<el-form-item label="' . $genTableColumn->comment . '" prop="' . $genTableColumn->name . '" ' . $required . ':error="error.' . $genTableColumn->name . '">
+        <el-input-number v-model="form.' . $genTableColumn->name . '" clearable />
+      </el-form-item>';
+                } elseif ($genTableColumn->_validate === 'boolean') {
+                    $label = Str::of($genTableColumn->comment)->explode(' ')->first();
+                    $form = '<el-form-item label="' . $label . '" prop="' . $genTableColumn->name . '" ' . $required . ':error="error.' . $genTableColumn->name . '">
+        <el-select v-model="form.' . $genTableColumn->name . '">
+          <el-option :key="1" :value="1" :label="$t(\'common.yes\')" />
+          <el-option :key="0" :value="0" :label="$t(\'common.no\')" />
+        </el-select>
+      </el-form-item>';
+                } else {
+                    throw new Exception('字段[' . $genTableColumn->name . ']未记录， 暂不支持生成新增TEXT表格');
+                }
+            } elseif ($genTableColumn->_foreign) {
+                $vFor = Str::of($genTableColumn->_foreign_table)->singular()->camel()->append('SelectData')->toString();
+                $label = Str::of($genTableColumn->_foreign_show)->explode(',')->first();
+                $form = '<el-form-item label="' . $genTableColumn->comment . '" prop="' . $genTableColumn->name . '" ' . $required . ':error="error.' . $genTableColumn->name . '">
+        <el-select v-if="' . $vFor . '.length > 0" v-model="form.' . $genTableColumn->name . '" clearable filterable>
+          <el-option
+            v-for="item in ' . $vFor . '"
+            :key="item.' . $genTableColumn->_foreign_column . '"
+            :value="item.' . $genTableColumn->_foreign_column . '"
+            :label="item.' . $label . '"
+          />
+        </el-select>
+      </el-form-item>';
+            } elseif (is_int($genTableColumn->dict_type_id)) {
+                $form = '<el-form-item label="' . $genTableColumn->comment . '" prop="' . $genTableColumn->name . '" ' . $required . ':error="error.' . $genTableColumn->name . '">
+        <el-select v-if="dict.length > 0" v-model="form.' . $genTableColumn->name . '" clearable filterable>
+          <el-option
+            v-for="item in dict.filter((e) => e.dict_type_id === ' . $genTableColumn->dict_type_id . ')"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          />
+        </el-select>
+      </el-form-item>';
+            } elseif ($genTableColumn->_show === Gen::TYPE_IMAGE) {
+                $httpRequestName = Str::of($genTableColumn->name)->singular()->studly()->toString();
+                $form = '<el-form-item label="' . $genTableColumn->comment . '" prop="' . $genTableColumn->name . '" ' . $required . ':error="error.' . $genTableColumn->name . '">
+        <el-upload
+          ref="' . $genTableColumn->name . '"
+          class="avatar-uploader"
+          action="#"
+          accept="image/*"
+          name="image"
+          :limit="1"
+          :show-file-list="false"
+          :http-request="upload' . $httpRequestName . 'Image"
+        >
+          <el-image v-if="form.' . $genTableColumn->name . '" class="avatar" :src="form.' . $genTableColumn->name . '" />
+          <i v-else class="el-icon-plus avatar-uploader-icon" />
+        </el-upload>
+      </el-form-item>';
+            } elseif ($genTableColumn->_show === Gen::TYPE_FILE) {
+                $httpRequestName = Str::of($genTableColumn->name)->singular()->studly()->toString();
+                $form = '<el-form-item label="' . $genTableColumn->comment . '" prop="' . $genTableColumn->name . '" ' . $required . ':error="error.' . $genTableColumn->name . '">
+        <el-upload
+          ref="' . $genTableColumn->name . '"
+          action="#"
+          accept="application/msword,application/pdf,text/plain,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,video/*"
+          name="file"
+          :limit="1"
+          :file-list="' . $genTableColumn->name . 'FileList"
+          :http-request="upload' . $httpRequestName . 'File"
+          :on-exceed="' . $genTableColumn->name . 'UploadExceed"
+          :on-remove="' . $genTableColumn->name . 'UploadRemove"
+        >
+          <el-button type="primary">{{ $t(\'file.uploadFileText.uploadText2\') }}</el-button>
+          <div slot="tip" class="el-upload__tip">{{ $t(\'common.uploadTip\') }}</div>
+        </el-upload>
+      </el-form-item>';
+            } elseif ($genTableColumn->_show === Gen::TYPE_EDITOR) {
+                $form = '<el-form-item label="' . $genTableColumn->comment . '" prop="' . $genTableColumn->name . '" ' . $required . ':error="error.' . $genTableColumn->name . '">
+        <WangEditor ref="' . $genTableColumn->name . 'Editor" v-model="form.' . $genTableColumn->name . '" />
+      </el-form-item>';
+            } elseif ($genTableColumn->_show === Gen::TYPE_DATE) {
+                $form = '<el-form-item label="' . $genTableColumn->comment . '" prop="' . $genTableColumn->name . '" ' . $required . ':error="error.' . $genTableColumn->name . '">
+        <el-date-picker
+          v-model="form.' . $genTableColumn->name . '"
+          type="datetime"
+          value-format="yyyy-MM-dd HH:mm:ss"
+          time-arrow-control
+        />
+      </el-form-item>';
+            } else {
+                throw new Exception('字段[' . $genTableColumn->name . ']未记录， 暂不支持生成新增表格');
+            }
+
+            return $form;
+        })->implode("\n      ");
+
+        $import = [];
+        $components = [];
+        $dataFormColumns = [];
+        $init = [];
+        $methods = [];
+        $resetForm = [];
+        $import[] = "import { {$singular}Create } from '@/api/{$singular}Api'";
+        if ($createColumns->where('dict_type_id', '=', true)->count() > 0) {
+            $import[] = "import { dictDataSelect } from '@/api/dict'";
+            $dataFormColumns[] = 'dict: []';
+            $init[] = "this.getDictData()";
+            $methods[] = 'getDictData() {
+      dictDataSelect().then(response => {
+        const { select = [] } = response.data
+        this.dict = select
+      })
+    }';
+        }
+        $foreignColumns = $createColumns->where('_foreign', '=', true)->values();
+        if ($foreignColumns->count() > 0) {
+            $import = $foreignColumns->map(function (GenTableColumn $genTableColumn): string {
+                $name = Str::of($genTableColumn->_foreign_table)->singular()->camel()->toString();
+                return "import { {$name}Select } from '@/api/{$name}Api'";
+            })->merge($import);
+            $dataFormColumns = $foreignColumns->map(function (GenTableColumn $genTableColumn): string {
+                return Str::of($genTableColumn->_foreign_table)->singular()->camel()->append('SelectData: []')->toString();
+            })->merge($dataFormColumns);
+            $init = $foreignColumns->map(function (GenTableColumn $genTableColumn): string {
+                return 'this.get' . Str::of($genTableColumn->_foreign_table)->singular()->studly()->append('Select()')->toString();
+            })->merge($init);
+            $methods = $foreignColumns->map(function (GenTableColumn $genTableColumn): string {
+                $name = Str::of($genTableColumn->_foreign_table)->singular()->studly()->toString();
+                $method = Str::of($genTableColumn->_foreign_table)->singular()->camel()->toString();
+                return 'get' . $name . 'Select() {
+      ' . $method . 'Select().then(response => {
+        const { select = [] } = response.data
+        this.' . $method . 'SelectData = select
+      })
+    }';
+            })->merge($methods);
+        }
+        $uploads = $createColumns->whereIn('_show', [Gen::TYPE_FILE, Gen::TYPE_IMAGE])->values();
+        if ($uploads->count() > 0) {
+            $fileImport[] = 'fileRemoveFile';
+            $fileUploads = $uploads->where('_show', '=', Gen::TYPE_FILE);
+            if ($fileUploads->count() > 0) {
+                $fileImport[] = 'fileUploadFile';
+                $dataFormColumns = $fileUploads->map(function (GenTableColumn $genTableColumn): string {
+                    return Str::of($genTableColumn->name)->append('FileList: []')->toString();
+                })->merge($dataFormColumns);
+                $methods = $fileUploads->map(function (GenTableColumn $genTableColumn): string {
+                    $name = Str::of($genTableColumn->name)->studly()->toString();
+                    return 'upload' . $name . 'File(file) {
+      const loading = this.$loading({
+        lock: true,
+        text: \'Loading\',
+        spinner: \'el-icon-loading\',
+        background: \'rgba(0, 0, 0, 0.7)\'
+      })
+      const data = new FormData()
+      data.append(file.filename, file.file)
+      fileUploadFile(data).then(response => {
+        const { path = \'\' } = response.data
+        this.form.' . $genTableColumn->name . ' = path
+        this.$message({ type: \'success\', message: response.message })
+      }).finally(_ => {
+        loading.close()
+      })
+    },
+    ' . $genTableColumn->name . 'UploadExceed(files, fileList) {
+      this.$message({
+        type: \'error\',
+        message: fileList[0].name + \' \' + this.$t(\'common.alreadyUpload\')
+      })
+    },
+    ' . $genTableColumn->name . 'UploadRemove(file, fileList) {
+      fileRemoveFile({
+        path: this.form.' . $genTableColumn->name . '
+      })
+    }';
+                })->merge($methods);
+                $resetForm = $fileUploads->map(function (GenTableColumn $genTableColumn): string {
+                    return 'this.$refs.' . $genTableColumn->name . '.clearFiles()';
+                })->merge($resetForm);
+            }
+            $imageUploads = $uploads->where('_show', '=', Gen::TYPE_IMAGE);
+            if ($imageUploads->count() > 0) {
+                $fileImport[] = 'fileUploadImage';
+                $methods = $imageUploads->map(function (GenTableColumn $genTableColumn): string {
+                    $name = Str::of($genTableColumn->name)->studly()->toString();
+                    return 'upload' . $name . 'Image(file) {
+      const deleteImage = this.form.' . $genTableColumn->name . '
+      const loading = this.$loading({
+        lock: true,
+        text: \'Loading\',
+        spinner: \'el-icon-loading\',
+        background: \'rgba(0, 0, 0, 0.7)\'
+      })
+      const data = new FormData()
+      data.append(file.filename, file.file)
+      fileUploadImage(data).then(response => {
+        const { path = \'\' } = response.data
+        this.form.' . $genTableColumn->name . ' = path
+        this.$message({ type: \'success\', message: response.message })
+      }).finally(_ => {
+        loading.close()
+        this.$refs.' . $genTableColumn->name . '.clearFiles()
+        if (deleteImage) {
+          fileRemoveFile({
+            path: deleteImage
+          })
+        }
+      })
+    }';
+                })->merge($methods);
+                $resetForm = $imageUploads->map(function (GenTableColumn $genTableColumn): string {
+                    return 'this.$refs.' . $genTableColumn->name . '.clearFiles()';
+                })->merge($resetForm);
+            }
+            $import[] = "import { " . implode(', ', $fileImport) . " } from '@/api/file'";
+        }
+        $editor = $createColumns->where('_show', '=', Gen::TYPE_EDITOR)->values();
+        if ($editor->count() > 0) {
+            $components[] = "WangEditor: () => import('@/components/WangEditor')";
+            $resetForm = $editor->map(function (GenTableColumn $genTableColumn): string {
+                return 'this.$refs.' . $genTableColumn->name . 'Editor.clear()';
+            })->merge($resetForm);
+        }
+
+        $import = $import->implode("\n");
+        $components = implode(",\n    ", $components);
+
+        $dataForm = $createColumns->map(function (GenTableColumn $genTableColumn): string {
+            $default = $genTableColumn->default;
+            if (is_null($default)) {
+                $default = "''";
+            } else {
+                if ($genTableColumn->type === 'integer') {
+                    $default = "'$default'";
+                }
+            }
+            return "$genTableColumn->name: $default";
+        })->implode(",\n        ");
+
+        $dataFormColumns = $dataFormColumns->implode(",\n      ");
+        $init = $init->implode("\n      ");
+        $methods = $methods->implode(",\n    ");
+        $resetForm = $resetForm->implode("\n      ");
+
+        $createVue = str_replace([
+            '{{createForm}}', '{{import}}', '{{singular}}', '{{components}}', '{{dataForm}}', '{{dataFormColumns}}', '{{init}}', '{{methods}}', '{{resetForm}}'
+        ], [
+            $createForm, $import, $singular, $components, $dataForm, $dataFormColumns, $init, $methods, $resetForm
+        ], GenTable::getStub('CreateVue'));
+        $path = "vue/src/views/{$singular}/create.vue";
+        Storage::disk('codes')->put($path, $createVue);
         return true;
     }
 

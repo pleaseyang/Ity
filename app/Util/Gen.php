@@ -7,6 +7,7 @@ use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\ForeignKeyConstraint;
 use Doctrine\DBAL\Schema\Index;
 use Doctrine\DBAL\Schema\Table;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -132,6 +133,7 @@ class Gen
 
         $columnsConfigData = array_map(function (array $column) use ($uniques, $foreignKeys) {
             $insert = true;
+            $update = true;
             $list = true;
             $select = true;
             // 如果是自增主键
@@ -141,12 +143,18 @@ class Gen
                 $select = false;
             }
 
+            // 如果是时间
+            if (in_array($column['name'], [Model::CREATED_AT, Model::UPDATED_AT])) {
+                $insert = false;
+                $update = false;
+            }
+
             $query = Gen::query($column['type']);
             $validate = Gen::validate($column['type']);
             $show = Gen::show($column['name']);
 
             $column['_insert'] = $insert;
-            $column['_update'] = true;
+            $column['_update'] = $update;
             $column['_list'] = $list;
             $column['_select'] = $select;
             $column['_query'] = $query;

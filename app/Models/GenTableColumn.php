@@ -182,6 +182,7 @@ class GenTableColumn extends Model
             throw new Exception("字段:$errorColumnString 不在 $this->_foreign_table 表内");
         }
 
+        $this->_show = Gen::TYPE_SELECT;
         $this->_foreign_show = implode(',', $columns);
         $this->save();
 

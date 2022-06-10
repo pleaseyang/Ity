@@ -53,6 +53,8 @@ class GenTableTest extends TestCase
         $m->setType('file');
         $m = GenTableColumn::where('name', 'content')->first();
         $m->setType('editor');
+        $m = GenTableColumn::where('name', 'admin_id')->first();
+        $m->setForeignShow(['name', 'type']);
         dd(GenTable::gen('test_db', 0, '小学生'));
     }
 
