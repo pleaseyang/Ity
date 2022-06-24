@@ -1,0 +1,83 @@
+<template>
+  <el-dialog
+    :visible.sync="dialogVisible"
+    modal-append-to-body
+    append-to-body
+    center
+    :close-on-click-modal="false"
+    @close="close"
+  >
+    <template slot="title">
+      <i class="el-icon-circle-plus-outline" /> {{ $t('common.create') }}
+    </template>
+    <el-form ref="form" :model="form" label-position="top" @submit.native.prevent="handleCreate">
+      {{createForm}}
+      <el-form-item>
+        <el-button type="primary" :loading="loading" native-type="submit">{{ $t('common.submit') }}</el-button>
+        <el-button @click="resetForm()">{{ $t('common.reset') }}</el-button>
+      </el-form-item>
+    </el-form>
+  </el-dialog>
+</template>
+
+<script>
+{{import}}
+
+export default {
+  name: '{{singular}}.create',
+  components: {
+    {{components}}
+  },
+  data() {
+    return {
+      dialogVisible: false,
+      form: {
+        {{dataForm}}
+      },
+      {{dataFormColumns}},
+      error: {},
+      loading: false
+    }
+  },
+  methods: {
+    init() {
+      this.dialogVisible = true
+      {{init}}
+    },
+    close() {
+      this.resetForm()
+    },
+    resetForm() {
+      {{resetForm}}
+      this.$refs.form.resetFields()
+    },
+    handleCreate() {
+      this.loading = true
+      this.error = {}
+      {{singular}}Create(this.form).then(response => {
+        this.$message({
+          showClose: true,
+          message: response.message,
+          type: 'success'
+        })
+        this.resetForm()
+        this.$emit('done', response.data)
+      }).catch(reason => {
+        const { data } = reason.response
+        if (data.code === 422) {
+          for (const k in data.data) {
+            this.error[k] = data.data[k].toString()
+          }
+        }
+      }).finally(_ => {
+        this.loading = false
+      })
+    },
+    {{methods}}
+  }
+}
+</script>
+
+<style scoped>
+
+</style>

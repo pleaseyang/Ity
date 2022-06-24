@@ -22,6 +22,16 @@ return [
             'fail' => '删除失败',
             'fail_message' => '删除失败: :MESSAGE',
         ],
+        'upload' => [
+            'success' => '上传成功',
+            'fail' => '上传失败',
+            'need_image' => '请上传图片',
+            'image_type_error' => '图片类型错误',
+            'need_file' => '请上传文件',
+            'file_type_error' => '文件类型错误',
+            'file_cannot_empty' => '文件内容不能为空',
+            'file_does_not_exist' => '文件不存在',
+        ],
         'offset' => '起始数',
         'limit' => '条数',
         'order' => '排序方式',
@@ -99,5 +109,29 @@ return [
         'is_error' => '错误',
         'is_robot' => '机器',
         'is_mobile' => '手机',
+    ],
+    'dict_type' => [
+        'name' => '字典名称',
+        'type' => '字典类型',
+        'status' => '字典状态',
+        'remark' => '字典备注',
+    ],
+    'dict_data' => [
+        'dict_type_id' => '字典 ID',
+        'sort' => '字典排序',
+        'label' => '字典标签',
+        'value' => '字典键值',
+        'list_class' => '表格回显样式',
+        'default' => '默认',
+        'status' => '状态',
+        'remark' => '备注',
+        'list_class_type' => [
+            'default' => '默认',
+            'primary' => '主要',
+            'success' => '成功',
+            'info' => '信息',
+            'warning' => '警告',
+            'danger' => '危险',
+        ]
     ]
 ];

@@ -67,6 +67,7 @@ class PermissionSeeder extends Seeder
         Permission::create(['pid' => $file->id, 'name' => 'file.download', 'title' => '下载文件', 'icon' => 'el-icon-download', 'path' => 'file/download', 'component' => 'file/download', 'guard_name' => 'admin', 'hidden' => 1]);
         Permission::create(['pid' => $file->id, 'name' => 'file.delete', 'title' => '删除文件', 'icon' => 'el-icon-delete', 'path' => 'file/delete', 'component' => 'file/delete', 'guard_name' => 'admin', 'hidden' => 1]);
 
+        $dict = Permission::create(['pid' => $system->id, 'name' => 'dict', 'title' => '字典管理', 'icon' => 'el-icon-collection-tag', 'path' => '/dict', 'component' => 'dict/index', 'guard_name' => 'admin', 'hidden' => 0]);
 
         $role1 = Role::create(['name' => 'Admin', 'guard_name' => 'admin']);
         $role1->givePermissionTo([
@@ -106,6 +107,7 @@ class PermissionSeeder extends Seeder
             'file.upload',
             'file.download',
             'file.delete',
+            'dict'
         ]);
 
         $user = Admin::find(1);

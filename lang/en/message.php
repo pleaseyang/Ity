@@ -22,6 +22,16 @@ return [
             'fail' => 'Delete failed',
             'fail_message' => 'Delete failed: :MESSAGE',
         ],
+        'upload' => [
+            'success' => 'Upload successfully',
+            'fail' => 'Upload failed',
+            'need_image' => 'Please upload image',
+            'image_type_error' => 'Please upload image type',
+            'need_file' => 'Please upload file',
+            'file_type_error' => 'File type error',
+            'file_cannot_empty' => 'File can\'t be empty',
+            'file_does_not_exist' => 'File don\'t exist',
+        ],
         'offset' => 'Starting number',
         'limit' => 'Number of pieces',
         'order' => 'Sort order',
@@ -98,5 +108,29 @@ return [
         'is_error' => 'Error',
         'is_robot' => 'Robot',
         'is_mobile' => 'Mobile',
+    ],
+    'dict_type' => [
+        'name' => 'Dictionary name',
+        'type' => 'Dictionary type',
+        'status' => 'Dictionary status',
+        'remark' => 'Dictionary remark',
+    ],
+    'dict_data' => [
+        'dict_type_id' => 'Dictionary ID',
+        'sort' => 'Sort',
+        'label' => 'Label',
+        'value' => 'Value',
+        'list_class' => 'Table echo style',
+        'default' => 'Default',
+        'status' => 'Status',
+        'remark' => 'Remark',
+        'list_class_type' => [
+            'default' => 'Default',
+            'primary' => 'Primary',
+            'success' => 'Success',
+            'info' => 'Info',
+            'warning' => 'Warning',
+            'danger' => 'Danger',
+        ]
     ]
 ];

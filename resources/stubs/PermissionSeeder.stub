@@ -1,0 +1,33 @@
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
+
+class {{className}}PermissionSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     * php artisan db:seed --class={{className}}PermissionSeeder
+     *
+     * @return void
+     */
+    public function run()
+    {
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
+        $list = Permission::create(['pid' => {{permissionId}}, 'name' => '{{singular}}.{{snake}}', 'title' => '{{permissionName}}', 'icon' => 'el-icon-star-on', 'path' => '/{{snake}}', 'component' => '{{singular}}/index', 'guard_name' => 'admin', 'hidden' => 0]);
+        $create = Permission::create(['pid' => $list->id, 'name' => '{{singular}}.create', 'title' => '创建{{permissionName}}', 'icon' => 'el-icon-star-on', 'path' => '{{singular}}/create', 'component' => '{{singular}}/create', 'guard_name' => 'admin', 'hidden' => 1]);
+        $update = Permission::create(['pid' => $list->id, 'name' => '{{singular}}.update', 'title' => '编辑{{permissionName}}', 'icon' => 'el-icon-star-on', 'path' => '{{singular}}/update', 'component' => '{{singular}}/update', 'guard_name' => 'admin', 'hidden' => 1]);
+        $delete = Permission::create(['pid' => $list->id, 'name' => '{{singular}}.delete', 'title' => '删除{{permissionName}}', 'icon' => 'el-icon-star-on', 'path' => '{{singular}}/delete', 'component' => '{{singular}}/delete', 'guard_name' => 'admin', 'hidden' => 1]);
+        $role = Role::findByName('Admin', 'admin');
+        $role->givePermissionTo([
+            $list,
+            $create,
+            $update,
+            $delete
+        ]);
+    }
+}

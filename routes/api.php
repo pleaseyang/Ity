@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\Admin\ActiveLogController;
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\DictDataController;
+use App\Http\Controllers\Admin\DictTypeController;
 use App\Http\Controllers\Admin\ExceptionErrorController;
 use App\Http\Controllers\Admin\FileSystemController;
 use App\Http\Controllers\Admin\LoginController;
@@ -104,11 +106,29 @@ Route::middleware(['lang'])->prefix('admin')->name('admin.')->group(function () 
                 ->middleware('permission:file.deleteDirectory');
             Route::post('file/upload', [FileSystemController::class, 'upload'])->middleware('permission:file.upload');
             Route::post('file/uploadUnPermission', [FileSystemController::class, 'upload']);
+            Route::post('file/uploadImage', [FileSystemController::class, 'uploadImage']);
+            Route::post('file/uploadFile', [FileSystemController::class, 'uploadFile']);
+            Route::post('file/removeFile', [FileSystemController::class, 'removeFile']);
             Route::post('file/download', [FileSystemController::class, 'download'])
                 ->middleware('permission:file.download');
             Route::post('file/delete', [FileSystemController::class, 'delete'])->middleware('permission:file.delete');
             // NGINX
             Route::post('nginx/logs', [NginxController::class, 'logs']);// ->middleware('permission:nginx.logs')
+            // 字典
+            Route::post('dictTypes', [DictTypeController::class, 'list'])->middleware('permission:dict');
+            Route::post('dictType', [DictTypeController::class, 'info'])->middleware('permission:dict');
+            Route::post('dictType/select', [DictTypeController::class, 'select'])->middleware('permission:dict');
+            Route::post('dictType/create', [DictTypeController::class, 'create'])->middleware('permission:dict');
+            Route::post('dictType/update', [DictTypeController::class, 'update'])->middleware('permission:dict');
+            Route::post('dictType/delete', [DictTypeController::class, 'delete'])->middleware('permission:dict');
+
+            Route::post('dictData/list', [DictDataController::class, 'list'])->middleware('permission:dict');
+            Route::post('dictData', [DictDataController::class, 'info'])->middleware('permission:dict');
+            Route::post('dictData/select', [DictDataController::class, 'select']);
+            Route::post('dictData/create', [DictDataController::class, 'create'])->middleware('permission:dict');
+            Route::post('dictData/update', [DictDataController::class, 'update'])->middleware('permission:dict');
+            Route::post('dictData/delete', [DictDataController::class, 'delete'])->middleware('permission:dict');
+            Route::post('dictData/listClass', [DictDataController::class, 'listClass'])->middleware('permission:dict');
         });
     });
 });
