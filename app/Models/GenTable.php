@@ -92,6 +92,9 @@ class GenTable extends Model
     public static function importTable(string $tableName): bool
     {
         $config = Gen::getTableConfig($tableName);
+        if (isset($config['exception']) && $config['exception']) {
+            throw new Exception($config['exception']);
+        }
         DB::beginTransaction();
         GenTable::whereName($tableName)->delete();
         $table = new GenTable();
