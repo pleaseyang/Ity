@@ -188,4 +188,12 @@ class GenTableColumn extends Model
 
         return $this;
     }
+
+    public function setUnique(): GenTableColumn
+    {
+        $this->_unique = true;
+        $this->save();
+
+        return $this;
+    }
 }

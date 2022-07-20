@@ -576,12 +576,14 @@ class GenTable extends Model
           action="#"
           accept="image/*"
           name="image"
+          list-type="picture"
           :limit="1"
-          :show-file-list="false"
           :http-request="upload' . $httpRequestName . 'Image"
+          :on-remove="' . $genTableColumn->name . 'UploadRemove"
+          :file-list="' . $genTableColumn->name . 'FileList"
+          :on-exceed="' . $genTableColumn->name . 'UploadExceed"
         >
-          <el-image v-if="form.' . $genTableColumn->name . '" class="avatar" :src="form.' . $genTableColumn->name . '" />
-          <i v-else class="el-icon-plus avatar-uploader-icon" />
+          <i class="el-icon-plus avatar-uploader-icon" />
         </el-upload>
       </el-form-item>';
             } elseif ($genTableColumn->_show === Gen::TYPE_FILE) {
@@ -710,10 +712,12 @@ class GenTable extends Model
             $imageUploads = $uploads->where('_show', '=', Gen::TYPE_IMAGE);
             if ($imageUploads->count() > 0) {
                 $fileImport[] = 'fileUploadImage';
+                $dataFormColumns = $imageUploads->map(function (GenTableColumn $genTableColumn): string {
+                    return Str::of($genTableColumn->name)->append('FileList: []')->toString();
+                })->merge($dataFormColumns);
                 $methods = $imageUploads->map(function (GenTableColumn $genTableColumn): string {
                     $name = Str::of($genTableColumn->name)->studly()->toString();
                     return 'upload' . $name . 'Image(file) {
-      const deleteImage = this.form.' . $genTableColumn->name . '
       const loading = this.$loading({
         lock: true,
         text: \'Loading\',
@@ -726,15 +730,29 @@ class GenTable extends Model
         const { path = \'\' } = response.data
         this.form.' . $genTableColumn->name . ' = path
         this.$message({ type: \'success\', message: response.message })
+        this.' . $genTableColumn->name . 'FileList.push({
+          name: path,
+          url: path
+        })
       }).finally(_ => {
         loading.close()
-        this.$refs.' . $genTableColumn->name . '.clearFiles()
-        if (deleteImage) {
-          fileRemoveFile({
-            path: deleteImage
-          })
-        }
       })
+    },
+    ' . $genTableColumn->name . 'UploadRemove() {
+      const deleteImage = this.form.' . $genTableColumn->name . '
+      fileRemoveFile({
+        path: deleteImage
+      }).finally(() => {
+        this.' . $genTableColumn->name . 'FileList = []
+      })
+    },
+    ' . $genTableColumn->name . 'UploadExceed(files, fileList) {
+      this.$refs.' . $genTableColumn->name . '.handleRemove(\'\', fileList[0].raw)
+      const file = {
+        filename: this.$refs.' . $genTableColumn->name . '.name,
+        file: files[0]
+      }
+      this.upload' . $name . 'Image(file)
     }';
                 })->merge($methods);
                 $resetForm = $imageUploads->map(function (GenTableColumn $genTableColumn): string {
@@ -759,7 +777,7 @@ class GenTable extends Model
             if (is_null($default)) {
                 $default = "''";
             } else {
-                if ($genTableColumn->type === 'integer') {
+                if ($genTableColumn->type === 'integer' || $genTableColumn->dict_type_id !== null) {
                     $default = "'$default'";
                 }
             }
