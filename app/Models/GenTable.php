@@ -718,6 +718,7 @@ class GenTable extends Model
                 $methods = $imageUploads->map(function (GenTableColumn $genTableColumn): string {
                     $name = Str::of($genTableColumn->name)->studly()->toString();
                     return 'upload' . $name . 'Image(file) {
+      this.' . $genTableColumn->name . 'FileList = []
       const loading = this.$loading({
         lock: true,
         text: \'Loading\',
@@ -743,7 +744,6 @@ class GenTable extends Model
       fileRemoveFile({
         path: deleteImage
       }).finally(() => {
-        this.' . $genTableColumn->name . 'FileList = []
       })
     },
     ' . $genTableColumn->name . 'UploadExceed(files, fileList) {
