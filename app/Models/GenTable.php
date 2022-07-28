@@ -397,7 +397,7 @@ class GenTable extends Model
           <el-date-picker
             v-model="form.' . $genTableColumn->name . '"
             type="datetime"
-            format="yyyy-MM-dd HH:mm:ss"
+            value-format="yyyy-MM-dd HH:mm:ss"
             time-arrow-control
           />
         </el-form-item>';
