@@ -239,7 +239,7 @@ class Gen
                 'string', 'text'
             ],
             Gen::SELECT_BETWEEN => [
-                'datetime', 'time'
+                'datetime', 'time', 'date'
             ]
         ];
 
