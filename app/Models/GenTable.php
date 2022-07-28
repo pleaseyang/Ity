@@ -700,8 +700,11 @@ class GenTable extends Model
       })
     },
     ' . $genTableColumn->name . 'UploadRemove(file, fileList) {
+      const deleteFile = this.form.' . $genTableColumn->name . '
+      this.form.' . $genTableColumn->name . ' = null
       fileRemoveFile({
-        path: this.form.' . $genTableColumn->name . '
+        path: deleteFile
+      }).finally(() => {
       })
     }';
                 })->merge($methods);
@@ -741,6 +744,7 @@ class GenTable extends Model
     },
     ' . $genTableColumn->name . 'UploadRemove() {
       const deleteImage = this.form.' . $genTableColumn->name . '
+      this.form.' . $genTableColumn->name . ' = null
       fileRemoveFile({
         path: deleteImage
       }).finally(() => {
