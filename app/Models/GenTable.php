@@ -136,6 +136,15 @@ class GenTable extends Model
         $columns = GenTableColumn::whereGenTableId($table->id)->get();
         $unCommentColumns = $columns->whereNull('comment')->values();
         if ($unCommentColumns->count() > 0) {
+            $unCommentColumns->each(function (GenTableColumn $genTableColumn): void {
+                if ($genTableColumn->name === 'id') {
+                    $genTableColumn->comment = '自增ID';
+                } elseif ($genTableColumn->name === Model::CREATED_AT) {
+                    $genTableColumn->comment = '创建时间';
+                } elseif ($genTableColumn->name === Model::UPDATED_AT) {
+                    $genTableColumn->comment = '更新时间';
+                }
+            });
             $unCommentName = $unCommentColumns->pluck('name')->implode('|');
             throw new Exception("$unCommentName 备注不能为空");
         }
