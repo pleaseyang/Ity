@@ -5,6 +5,7 @@ namespace Models;
 use App\Models\DictType;
 use App\Models\GenTable;
 use App\Models\GenTableColumn;
+use App\Util\Gen;
 use Tests\TestCase;
 
 class GenTableTest extends TestCase
@@ -64,5 +65,13 @@ class GenTableTest extends TestCase
     {
         $m = GenTableColumn::where('name', 'admin_id')->first();
         $m->setForeignShow(['name', 'type']);
+    }
+
+    public function testGenTableTest()
+    {
+        $data = Gen::getTableInfo('exception_errors');
+        GenTable::importTable('exception_errors');
+        GenTable::importTable('password_resets');
+//        dd(GenTable::gen('gen_tables', 0, '代码生成'));
     }
 }

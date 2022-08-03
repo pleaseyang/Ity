@@ -26,29 +26,26 @@
 export default {
   name: '{{singular}}.create',
   components: {
-    {{components}}
+{{components}}
   },
   data() {
     return {
       dialogVisible: false,
       form: {
         {{dataForm}}
-      },
-      {{dataFormColumns}},
+      },{{dataFormColumns}}
       error: {},
       loading: false
     }
   },
   methods: {
     init() {
-      this.dialogVisible = true
-      {{init}}
+      this.dialogVisible = true{{init}}
     },
     close() {
       this.resetForm()
     },
-    resetForm() {
-      {{resetForm}}
+    resetForm() {{{resetForm}}
       this.$refs.form.resetFields()
     },
     handleCreate() {
@@ -72,8 +69,7 @@ export default {
       }).finally(_ => {
         this.loading = false
       })
-    },
-    {{methods}}
+    }{{methods}}
   }
 }
 </script>

@@ -75,7 +75,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @method static \Illuminate\Database\Eloquent\Builder|GenTableColumn whereValidate($value)
  * @mixin \Eloquent
  */
-class GenTableColumn extends Model
+class GenTableColumn extends BaseModel
 {
     use HasFactory, LogsActivity;
 

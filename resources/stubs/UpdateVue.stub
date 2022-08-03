@@ -24,13 +24,12 @@
 export default {
   name: '{{singular}}.update',
   components: {
-    {{components}}
+{{components}}
   },
   data() {
     return {
       dialogVisible: false,
-      form: {},
-      {{dataFormColumns}},
+      form: {},{{dataFormColumns}}
       error: {},
       loading: false
     }
@@ -46,8 +45,7 @@ export default {
       {{singular}}Info({
         {{primaryId}}: {{primaryId}}
       }).then(response => {
-        this.form = response.data
-        {{init}}
+        this.form = response.data{{init}}
         this.dialogVisible = true
       }).finally(_ => {
         loading.close()
@@ -73,8 +71,7 @@ export default {
       }).finally(_ => {
         this.loading = false
       })
-    },
-    {{methods}}
+    }{{methods}}
   }
 }
 </script>

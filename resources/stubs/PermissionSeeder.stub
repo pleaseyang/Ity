@@ -15,7 +15,7 @@ class {{className}}PermissionSeeder extends Seeder
      *
      * @return void
      */
-    public function run()
+    public function run(): void
     {
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
         $list = Permission::create(['pid' => {{permissionId}}, 'name' => '{{singular}}.{{snake}}', 'title' => '{{permissionName}}', 'icon' => 'el-icon-star-on', 'path' => '/{{snake}}', 'component' => '{{singular}}/index', 'guard_name' => 'admin', 'hidden' => 0]);

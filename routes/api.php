@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\DictDataController;
 use App\Http\Controllers\Admin\DictTypeController;
 use App\Http\Controllers\Admin\ExceptionErrorController;
 use App\Http\Controllers\Admin\FileSystemController;
+use App\Http\Controllers\Admin\GenTableController;
 use App\Http\Controllers\Admin\LoginController;
 use App\Http\Controllers\Admin\NginxController;
 use App\Http\Controllers\Admin\NotificationController;
@@ -129,6 +130,17 @@ Route::middleware(['lang'])->prefix('admin')->name('admin.')->group(function () 
             Route::post('dictData/update', [DictDataController::class, 'update'])->middleware('permission:dict');
             Route::post('dictData/delete', [DictDataController::class, 'delete'])->middleware('permission:dict');
             Route::post('dictData/listClass', [DictDataController::class, 'listClass'])->middleware('permission:dict');
+
+            Route::post('genTables', [GenTableController::class, 'list'])->middleware('permission:genTable.genTables');
+            Route::post('genTable', [GenTableController::class, 'info'])->middleware('permission:genTable.genTables');
+            Route::post('genTable/select', [GenTableController::class, 'select']);
+            Route::post('genTable/importTable', [GenTableController::class, 'importTable'])->middleware('permission:genTable.genTables');
+            Route::post('genTable/columnConfig', [GenTableController::class, 'columnConfig'])->middleware('permission:genTable.genTables');
+            Route::post('genTable/create', [GenTableController::class, 'create'])->middleware('permission:genTable.genTables');
+            Route::post('genTable/update', [GenTableController::class, 'update'])->middleware('permission:genTable.genTables');
+            Route::post('genTable/delete', [GenTableController::class, 'delete'])->middleware('permission:genTable.genTables');
+            Route::post('genTable/gen', [GenTableController::class, 'gen'])->middleware('permission:genTable.genTables');
+            Route::post('genTable/download', [GenTableController::class, 'download'])->middleware('permission:genTable.genTables');
         });
     });
 });

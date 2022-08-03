@@ -4,9 +4,11 @@ namespace App\Models;
 
 use App\Util\Gen;
 use Exception;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Route;
@@ -49,9 +51,37 @@ use ZipArchive;
  * @property-read int|null $gen_table_columns_count
  * @mixin \Eloquent
  */
-class GenTable extends Model
+class GenTable extends BaseModel
 {
     use HasFactory, LogsActivity;
+
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'gen_tables';
+
+    /**
+     * The primary key for the model.
+     *
+     * @var string
+     */
+    protected $primaryKey = 'id';
+
+    /**
+     * The "type" of the primary key ID.
+     *
+     * @var string
+     */
+    protected $keyType = 'int';
+
+    /**
+     * Indicates if the model should be timestamped.
+     *
+     * @var bool
+     */
+    public $timestamps = true;
 
     /**
      * The attributes that are mass assignable.
@@ -59,7 +89,7 @@ class GenTable extends Model
      * @var array
      */
     protected $fillable = [
-        'name', 'comment', 'engine', 'charset', 'collation'
+        'name', 'comment', 'engine', 'charset', 'collation', 'created_at', 'updated_at'
     ];
 
     /**
@@ -68,7 +98,7 @@ class GenTable extends Model
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->useLogName('gen_table')
+            ->useLogName('genTable')
             ->logFillable()
             ->logUnguarded();
     }
@@ -76,6 +106,65 @@ class GenTable extends Model
     public function genTableColumns(): HasMany
     {
         return $this->hasMany(GenTableColumn::class);
+    }
+
+    /**
+     * 列表
+     *
+     * @param array $validated
+     * @return array
+     */
+    public static function list(array $validated): array
+    {
+        $model = GenTable::when(isset($validated['name']), function (Builder $query) use ($validated): Builder {
+            return $query->where('gen_tables.name', 'LIKE', '%' . $validated['name'] . '%');
+        })->when(isset($validated['comment']), function (Builder $query) use ($validated): Builder {
+            return $query->where('gen_tables.comment', 'LIKE', '%' . $validated['comment'] . '%');
+        })->when(isset($validated['engine']), function (Builder $query) use ($validated): Builder {
+            return $query->where('gen_tables.engine', 'LIKE', '%' . $validated['engine'] . '%');
+        })->when(isset($validated['charset']), function (Builder $query) use ($validated): Builder {
+            return $query->where('gen_tables.charset', 'LIKE', '%' . $validated['charset'] . '%');
+        })->when(isset($validated['collation']), function (Builder $query) use ($validated): Builder {
+            return $query->where('gen_tables.collation', 'LIKE', '%' . $validated['collation'] . '%');
+        })->when(isset($validated['created_at_start']) && isset($validated['created_at_end']), function (Builder $query) use ($validated): Builder {
+            return $query->whereBetween('gen_tables.created_at', [$validated['created_at_start'], $validated['created_at_end']]);
+        })->when(isset($validated['created_at_start']) && !isset($validated['created_at_end']), function (Builder $query) use ($validated): Builder {
+            return $query->where('gen_tables.created_at', '>=', $validated['created_at_start']);
+        })->when(!isset($validated['created_at_start']) && isset($validated['created_at_end']), function (Builder $query) use ($validated): Builder {
+            return $query->where('gen_tables.created_at', '<=', $validated['created_at_end']);
+        })->when(isset($validated['updated_at_start']) && isset($validated['updated_at_end']), function (Builder $query) use ($validated): Builder {
+            return $query->whereBetween('gen_tables.updated_at', [$validated['updated_at_start'], $validated['updated_at_end']]);
+        })->when(isset($validated['updated_at_start']) && !isset($validated['updated_at_end']), function (Builder $query) use ($validated): Builder {
+            return $query->where('gen_tables.updated_at', '>=', $validated['updated_at_start']);
+        })->when(!isset($validated['updated_at_start']) && isset($validated['updated_at_end']), function (Builder $query) use ($validated): Builder {
+            return $query->where('gen_tables.updated_at', '<=', $validated['updated_at_end']);
+        });
+        $total = $model->count('gen_tables.id');
+        $data = $model
+            ->orderBy($validated['sort'] ?? 'created_at', $validated['order'] === 'ascending' ? 'asc' : 'desc')
+            ->offset(($validated['offset'] - 1) * $validated['limit'])
+            ->limit($validated['limit'])
+            ->select([
+                'gen_tables.name', 'gen_tables.comment', 'gen_tables.engine', 'gen_tables.charset', 'gen_tables.collation', 'gen_tables.created_at', 'gen_tables.updated_at', 'gen_tables.id'
+            ])
+            ->get();
+        return [
+            'data' => $data,
+            'total' => $total
+        ];
+    }
+
+
+    /**
+     * 列表
+     *
+     * @return Collection
+     */
+    public static function selectAll(): Collection
+    {
+        return GenTable::select([
+            'gen_tables.name', 'gen_tables.comment', 'gen_tables.engine', 'gen_tables.charset', 'gen_tables.collation', 'gen_tables.created_at', 'gen_tables.updated_at', 'gen_tables.id'
+        ])->get();
     }
 
     public static function getImportTableList(): array
@@ -116,6 +205,15 @@ class GenTable extends Model
             $column['gen_table_id'] = $table->id;
             $column['created_at'] = now();
             $column['updated_at'] = now();
+            if ($column['comment'] === '' || $column['comment'] === null) {
+                if ($column['name'] === 'id') {
+                    $column['comment'] = '自增ID';
+                } elseif ($column['name'] === Model::CREATED_AT) {
+                    $column['comment'] = '创建时间';
+                } elseif ($column['name'] === Model::UPDATED_AT) {
+                    $column['comment'] = '更新时间';
+                }
+            }
             return $column;
         }, $config['columns']);
         GenTableColumn::insert($columns);
@@ -134,6 +232,15 @@ class GenTable extends Model
     {
         $table = GenTable::whereName($tableName)->first();
         $columns = GenTableColumn::whereGenTableId($table->id)->get();
+        $columns->whereNull('comment')->each(function (GenTableColumn $genTableColumn): void {
+            if ($genTableColumn->name === 'id') {
+                $genTableColumn->comment = '自增ID';
+            } elseif ($genTableColumn->name === Model::CREATED_AT) {
+                $genTableColumn->comment = '创建时间';
+            } elseif ($genTableColumn->name === Model::UPDATED_AT) {
+                $genTableColumn->comment = '更新时间';
+            }
+        });
         $unCommentColumns = $columns->whereNull('comment')->values();
         if ($unCommentColumns->count() > 0) {
             $unCommentColumns->each(function (GenTableColumn $genTableColumn): void {
@@ -358,10 +465,15 @@ class GenTable extends Model
         $timestamps = in_array(Model::CREATED_AT, $columnNameList) && in_array(Model::UPDATED_AT, $columnNameList);
         $sort = $timestamps ? Model::CREATED_AT : $primary->name;
 
+        $keyType = 'string';
+        if (in_array($primary->type, ['bigint', 'integer'])) {
+            $keyType = 'int';
+        }
+
         $model = str_replace([
             '{{className}}', '{{fillable}}', '{{singular}}', '{{where}}', '{{select}}', '{{tableName}}', '{{primaryKey}}', '{{keyType}}', '{{timestamps}}', '{{sort}}', '{{count}}'
         ], [
-            $className, $fillable, $singular, $where, $selectDbColumns, $tableName, $primary->name, $primary->type === 'integer' ? 'int' : 'string', $timestamps ? 'true' : 'false', $sort, $tableName . '.' . $primary->name
+            $className, $fillable, $singular, $where, $selectDbColumns, $tableName, $primary->name, $keyType, $timestamps ? 'true' : 'false', $sort, $tableName . '.' . $primary->name
         ], GenTable::getStub('Model'));
         $path = "php/app/Models/{$className}.php";
         Storage::disk('codes')->put($path, $model);
@@ -483,8 +595,8 @@ class GenTable extends Model
         })->implode(",\n        ");
 
         $components = [];
-        $components[] = "create: () => import('@/views/testDb/create')";
-        $components[] = "update: () => import('@/views/testDb/update')";
+        $components[] = "create: () => import('@/views/{$singular}/create')";
+        $components[] = "update: () => import('@/views/{$singular}/update')";
         $dataFormColumns = [];
         $mounted = [];
         $methods = [];
@@ -526,12 +638,25 @@ class GenTable extends Model
                 return "import { {$name}Select } from '@/api/{$name}Api'";
             })->merge($import);
         }
-        $dataFormColumns = $dataFormColumns->implode(",\n      ");
+        $dataFormColumns = collect($dataFormColumns)->implode(",\n      ");
         $components = implode(",\n    ", $components);
-        $mounted = $mounted->implode("\n    ");
-        $methods = $methods->implode(",\n    ");
-        $import = $import->implode("\n");
+        $mounted = collect($mounted)->implode("\n    ");
+        $methods = collect($methods)->implode(",\n    ");
+        $import = collect($import)->implode("\n");
 
+        // 格式化
+        if ($dataForm !== '') {
+            $dataForm = ",\n        ".$dataForm;
+        }
+        if ($dataFormColumns !== '') {
+            $dataFormColumns = ",\n      ".$dataFormColumns;
+        }
+        if ($mounted !== '') {
+            $mounted = "\n    ".$mounted;
+        }
+        if ($methods !== '') {
+            $methods = ",\n    ".$methods;
+        }
         $indexVue = str_replace([
             '{{form}}', '{{table}}', '{{name}}', '{{dataForm}}', '{{primaryId}}', '{{components}}', '{{dataFormColumns}}', '{{mounted}}', '{{methods}}', '{{import}}', '{{singular}}', '{{sort}}'
         ], [
@@ -793,7 +918,7 @@ class GenTable extends Model
             })->merge($resetForm);
         }
 
-        $import = $import->implode("\n");
+        $import = collect($import)->implode("\n");
         $components = implode(",\n    ", $components);
 
         $dataForm = $createColumns->map(function (GenTableColumn $genTableColumn): string {
@@ -808,11 +933,26 @@ class GenTable extends Model
             return "$genTableColumn->name: $default";
         })->implode(",\n        ");
 
-        $dataFormColumns = $dataFormColumns->implode(",\n      ");
-        $init = $init->implode("\n      ");
-        $methods = $methods->implode(",\n    ");
-        $resetForm = $resetForm->implode("\n      ");
+        $dataFormColumns = collect($dataFormColumns)->implode(",\n      ");
+        $init = collect($init)->implode("\n      ");
+        $methods = collect($methods)->implode(",\n    ");
+        $resetForm = collect($resetForm)->implode("\n      ");
 
+        if ($dataFormColumns !== '') {
+            $dataFormColumns = "\n      " . $dataFormColumns . ",";
+        }
+        if ($init !== '') {
+            $init = "\n      " . $init;
+        }
+        if ($resetForm !== '') {
+            $resetForm = "\n      " . $resetForm;
+        }
+        if ($methods !== '') {
+            $methods = ",\n    " . $methods;
+        }
+        if ($components !== '') {
+            $components = "    " . $components;
+        }
         $createVue = str_replace([
             '{{createForm}}', '{{import}}', '{{singular}}', '{{components}}', '{{dataForm}}', '{{dataFormColumns}}', '{{init}}', '{{methods}}', '{{resetForm}}'
         ], [
@@ -1077,16 +1217,27 @@ class GenTable extends Model
         $init = $createColumns->filter(function (GenTableColumn $genTableColumn): bool {
             return $genTableColumn->dict_type_id !== null;
         })->map(function (GenTableColumn $genTableColumn): string {
-            return 'this.form.' . $genTableColumn->name . ' = this.form.' . $genTableColumn->name . '.toString()';
+            return '  this.form.' . $genTableColumn->name . ' = this.form.' . $genTableColumn->name . '.toString()';
         })->merge($init);
 
 
-        $import = $import->implode("\n");
+        $import = collect($import)->implode("\n");
         $components = implode(",\n    ", $components);
-        $dataFormColumns = $dataFormColumns->implode(",\n      ");
-        $init = $init->implode("\n        ");
-        $methods = $methods->implode(",\n    ");
-
+        $dataFormColumns = collect($dataFormColumns)->implode(",\n      ");
+        $init = collect($init)->implode("\n        ");
+        $methods = collect($methods)->implode(",\n    ");
+        if ($dataFormColumns !== '') {
+            $dataFormColumns = "\n      " . $dataFormColumns . ",";
+        }
+        if ($init !== '') {
+            $init = "\n      " . $init . "\n";
+        }
+        if ($methods !== '') {
+            $methods = ",\n    " . $methods;
+        }
+        if ($components !== '') {
+            $components = "    " . $components;
+        }
 
         $updateVue = str_replace([
             '{{updateForm}}', '{{import}}', '{{singular}}', '{{components}}', '{{dataFormColumns}}', '{{primaryId}}', '{{init}}', '{{methods}}'

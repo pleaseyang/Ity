@@ -62,14 +62,11 @@ export default {
         offset: 1,
         limit: 10,
         order: 'descending',
-        sort: '{{sort}}',
-        {{dataForm}}
-      },
-      {{dataFormColumns}}
+        sort: '{{sort}}'{{dataForm}}
+      }{{dataFormColumns}}
     }
   },
-  mounted() {
-    {{mounted}}
+  mounted() {{{mounted}}
     this.getList()
   },
   methods: {
@@ -142,8 +139,7 @@ export default {
     },
     handleEdit({ {{primaryId}} }) {
       this.$refs.update.init({{primaryId}})
-    },
-    {{methods}}
+    }{{methods}}
   }
 }
 </script>

@@ -47,10 +47,15 @@ class Gen
 
         return array_values(array_filter(array_map(function (Table $table) {
             $db = [];
-            $name = $table->getName();
-            $db['name'] = $name;
-            foreach ($table->getOptions() as $key => $option) {
-                $db[$key] = $option;
+            try {
+                $table->getPrimaryKeyColumns();
+                $name = $table->getName();
+                $db['name'] = $name;
+                foreach ($table->getOptions() as $key => $option) {
+                    $db[$key] = $option;
+                }
+            } catch (Exception) {
+
             }
             return $db;
         }, $tables)));
@@ -168,9 +173,9 @@ class Gen
             $column['_foreign_table'] = null;
             $column['_foreign_column'] = null;
 
-            $foreign = array_filter($foreignKeys, function (array $fk) use ($column) {
-               return $fk['local_column'] === $column['name'];
-            });
+            $foreign = array_values(array_filter($foreignKeys, function (array $fk) use ($column) {
+                return $fk['local_column'] === $column['name'];
+            }));
 
             if (count($foreign) === 1) {
                 $column['_foreign'] = true;
