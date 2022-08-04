@@ -137,6 +137,11 @@ class Gen
         })));
 
         $columnsConfigData = array_map(function (array $column) use ($uniques, $foreignKeys) {
+
+            $foreign = array_values(array_filter($foreignKeys, function (array $fk) use ($column) {
+                return $fk['local_column'] === $column['name'];
+            }));
+
             $insert = true;
             $update = true;
             $list = true;
@@ -157,6 +162,10 @@ class Gen
             $query = Gen::query($column['type']);
             $validate = Gen::validate($column['type']);
             $show = Gen::show($column['name']);
+            // 外键使用select
+            if (count($foreign) === 1) {
+                $show = Gen::TYPE_SELECT;
+            }
 
             $column['_insert'] = $insert;
             $column['_update'] = $update;
@@ -172,10 +181,6 @@ class Gen
             $column['_foreign'] = false;
             $column['_foreign_table'] = null;
             $column['_foreign_column'] = null;
-
-            $foreign = array_values(array_filter($foreignKeys, function (array $fk) use ($column) {
-                return $fk['local_column'] === $column['name'];
-            }));
 
             if (count($foreign) === 1) {
                 $column['_foreign'] = true;
