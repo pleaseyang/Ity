@@ -181,11 +181,21 @@ class Gen
             $column['_foreign'] = false;
             $column['_foreign_table'] = null;
             $column['_foreign_column'] = null;
+            $column['_foreign_show'] = null;
 
             if (count($foreign) === 1) {
                 $column['_foreign'] = true;
                 $column['_foreign_table'] = $foreign[0]['_foreign_table'];
                 $column['_foreign_column'] = $foreign[0]['_foreign_column'];
+                $info = Gen::getTableInfo($foreign[0]['_foreign_table']);
+                $foreignColumn = array_values(array_map(function (array $column): string {
+                    return $column['name'];
+                }, array_filter($info['columns'], function (array $column) use ($foreign): bool {
+                    return $column['name'] !== $foreign[0]['_foreign_column'];
+                })));
+                if (count($foreignColumn) > 0) {
+                    $column['_foreign_show'] = $foreignColumn[0];
+                }
             }
 
             return $column;
