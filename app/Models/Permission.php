@@ -142,6 +142,9 @@ class Permission extends \Spatie\Permission\Models\Permission
     public static function tree(array $data): array
     {
         $permissions = Permission::where('guard_name', '=', $data['guard_name'])
+            ->when(isset($data['hidden']) && is_numeric($data['hidden']), function (Builder $query) use ($data): Builder {
+                return $query->where('hidden', '=', $data['hidden']);
+            })
             ->select(['id', 'pid', 'name', 'title', 'icon'])
             ->orderByDesc('sort')
             ->get();

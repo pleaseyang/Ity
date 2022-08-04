@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Admin\{{className}};
+namespace App\Http\Requests\Admin\GenTable;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -25,7 +25,7 @@ class CreateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            {{rules}}
+            'table' => ['required', 'array'],
         ];
     }
 
@@ -37,7 +37,7 @@ class CreateRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            {{attributes}}
+            'table' => __('message.gen.table'),
         ];
     }
 

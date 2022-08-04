@@ -1,0 +1,149 @@
+<template>
+  <el-row class="app-container">
+    <el-col :span="24">
+      <el-form ref="form" :inline="true" :model="form" @submit.native.prevent="onSubmit">
+        <el-form-item>
+          <el-button type="primary" icon="el-icon-circle-plus-outline" @click="handleCreate">{{ $t('common.create') }}</el-button>
+        </el-form-item>
+        {{form}}
+        <el-form-item>
+          <el-button :loading="loading" icon="el-icon-search" type="primary" native-type="submit">{{ $t('common.search') }}</el-button>
+          <el-button icon="el-icon-refresh-left" @click="resetForm">{{ $t('common.reset') }}</el-button>
+        </el-form-item>
+      </el-form>
+    </el-col>
+    <el-col :span="24">
+      <el-table
+        highlight-current-row
+        :data="data"
+        style="width: 100%"
+        :default-sort="{prop: form.sort, order: form.order}"
+        @sort-change="tableSortChange"
+      >
+        {{table}}
+        <el-table-column :label="$t('common.handle')" width="300px">
+          <template scope="scope">
+            <el-button icon="el-icon-edit-outline" type="primary" @click="handleEdit(scope.row)">{{ $t('common.update') }}</el-button>
+            <el-button icon="el-icon-delete" type="danger" @click="handleDelete(scope.row)">{{ $t('common.delete') }}</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-col>
+    <el-col :span="24" class="margin-t-10">
+      <el-pagination
+        :page-sizes="[10, 25, 50]"
+        :page-size="10"
+        :current-page="form.offset"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="total"
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+      />
+    </el-col>
+    <create ref="create" @done="getList" />
+    <update ref="update" @done="getList" />
+  </el-row>
+</template>
+
+<script>
+{{import}}
+
+export default {
+  name: '{{name}}',
+  components: {
+    {{components}}
+  },
+  data() {
+    return {
+      loading: false,
+      data: [],
+      total: 0,
+      form: {
+        offset: 1,
+        limit: 10,
+        order: 'descending',
+        sort: '{{sort}}'{{dataForm}}
+      }{{dataFormColumns}}
+    }
+  },
+  mounted() {{{mounted}}
+    this.getList()
+  },
+  methods: {
+    getList() {
+      this.loading = true
+      {{singular}}List(this.form).then(response => {
+        const { data = [], total = 0 } = response.data
+        this.data = data
+        this.total = total
+      }).catch(_ => {
+        this.data = []
+        this.total = 0
+      }).finally(_ => {
+        this.loading = false
+      })
+    },
+    handleSizeChange(val) {
+      this.form.limit = val
+      this.getList()
+    },
+    handleCurrentChange(val) {
+      this.form.offset = val
+      this.getList()
+    },
+    tableSortChange(column) {
+      this.form.order = column.order ? column.order : 'descending'
+      this.form.sort = column.prop
+      this.form.offset = 1
+      this.getList()
+    },
+    onSubmit() {
+      this.form.offset = 1
+      this.getList()
+    },
+    resetForm() {
+      this.$refs.form.resetFields()
+      this.form.offset = 1
+      this.getList()
+    },
+    handleDelete({ {{primaryId}} }) {
+      this.$confirm(this.$t('common.confirmDelete'), this.$t('common.tips'), {
+        confirmButtonText: this.$t('common.confirmButtonText'),
+        cancelButtonText: this.$t('common.cancelButtonText'),
+        type: 'warning'
+      }).then(() => {
+        const loading = this.$loading({
+          lock: true,
+          text: 'Loading',
+          spinner: 'el-icon-loading',
+          background: 'rgba(0, 0, 0, 0.7)'
+        })
+        {{singular}}Delete({
+          {{primaryId}}: {{primaryId}}
+        }).then(response => {
+          this.$message({
+            showClose: true,
+            message: response.message,
+            type: 'success'
+          })
+          this.getList()
+        }).finally(_ => {
+          loading.close()
+        })
+      }).catch(() => {
+
+      })
+    },
+    handleCreate() {
+      this.$refs.create.init()
+    },
+    handleEdit({ {{primaryId}} }) {
+      this.$refs.update.init({{primaryId}})
+    }{{methods}}
+  }
+}
+</script>
+
+<style scoped>
+
+</style>

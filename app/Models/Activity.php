@@ -39,6 +39,13 @@ use Illuminate\Database\Eloquent\Builder;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Activity whereSubjectType($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Activity whereUpdatedAt($value)
  * @mixin \Eloquent
+ * @property string|null $event
+ * @property string|null $batch_uuid
+ * @method static Builder|Activity forBatch(string $batchUuid)
+ * @method static Builder|Activity forEvent(string $event)
+ * @method static Builder|Activity hasBatch()
+ * @method static Builder|Activity whereBatchUuid($value)
+ * @method static Builder|Activity whereEvent($value)
  */
 class Activity extends \Spatie\Activitylog\Models\Activity
 {

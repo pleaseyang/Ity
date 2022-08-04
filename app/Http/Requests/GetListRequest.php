@@ -29,8 +29,8 @@ class GetListRequest extends FormRequest
             'limit' => ['required', 'numeric', 'gte:1', 'lte:50'],
             'order' => ['required', 'string', Rule::in(['descending', 'ascending'])],
             'sort' => ['nullable', 'string'],
-            'start_at' => ['required_with:end_at', 'date_format:Y-m-d H:i:s', 'before_or_equal:end_at'],
-            'end_at' => ['required_with:start_at', 'date_format:Y-m-d H:i:s', 'after_or_equal:start_at'],
+            'start_at' => ['nullable', 'required_with:end_at', 'date_format:Y-m-d H:i:s', 'before_or_equal:end_at'],
+            'end_at' => ['nullable', 'required_with:start_at', 'date_format:Y-m-d H:i:s', 'after_or_equal:start_at'],
         ];
     }
 

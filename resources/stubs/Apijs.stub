@@ -1,5 +1,6 @@
 import request from '@/utils/request'
-export function {{snake}}(data) {
+
+export function {{singular}}List(data) {
   return request({
     url: '/{{snake}}',
     method: 'post',
@@ -7,7 +8,7 @@ export function {{snake}}(data) {
   })
 }
 
-export function {{singular}}(data) {
+export function {{singular}}Info(data) {
   return request({
     url: '/{{singular}}',
     method: 'post',
@@ -15,7 +16,15 @@ export function {{singular}}(data) {
   })
 }
 
-export function create(data) {
+export function {{singular}}Select(data) {
+  return request({
+    url: '/{{singular}}/select',
+    method: 'post',
+    data
+  })
+}
+
+export function {{singular}}Create(data) {
   return request({
     url: '/{{singular}}/create',
     method: 'post',
@@ -23,7 +32,7 @@ export function create(data) {
   })
 }
 
-export function update(data) {
+export function {{singular}}Update(data) {
   return request({
     url: '/{{singular}}/update',
     method: 'post',
@@ -31,7 +40,7 @@ export function update(data) {
   })
 }
 
-export function deleted(data) {
+export function {{singular}}Delete(data) {
   return request({
     url: '/{{singular}}/delete',
     method: 'post',

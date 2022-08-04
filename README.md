@@ -58,6 +58,10 @@ LARAVEL Notifiable Trait 搭建
 2. `php artisan ide-helper:models` (为数据模型生成注释)
 3. `php artisan ide-helper:meta` (生成 PhpStorm Meta file)
 
+### 代码生成器
+新增代码生成器(测试版)。可进行CURD，加快开发效率。
+![系统异常](.github/代码生成器.png)
+
 ### 部署
 1. APP_ENV=production
 2. APP_DEBUG=false
@@ -90,3 +94,7 @@ master :laravel最新版本的分支. 其余以laravel版本号进行命名
 * [jetbrains](https://www.jetbrains.com) ![](.github/jetbrains.svg)
 * [laravel](https://learnku.com/docs/laravel/8.x)
 * [workerman](https://github.com/walkor/workerman)
+
+## 请作者喝咖啡
+![系统异常](.github/wechat.jpg)
+
