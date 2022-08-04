@@ -8,6 +8,7 @@ use Illuminate\Database\Query\Builder as Query;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
@@ -209,5 +210,10 @@ class Admin extends Authenticatable implements JWTSubject
         return new FunctionReturn($admin->update($data), '', [
             'admin' => $admin
         ]);
+    }
+
+    public static function selectAll(): Collection
+    {
+        return Admin::select(['id', 'name'])->get();
     }
 }
