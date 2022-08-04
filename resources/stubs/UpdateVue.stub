@@ -1,0 +1,81 @@
+<template>
+  <el-dialog
+    :visible.sync="dialogVisible"
+    modal-append-to-body
+    append-to-body
+    center
+    :close-on-click-modal="false"
+  >
+    <template slot="title">
+      <i class="el-icon-edit-outline" /> {{ $t('common.update') }}
+    </template>
+    <el-form ref="form" :model="form" label-position="top" @submit.native.prevent="handleUpdate">
+      {{updateForm}}
+      <el-form-item>
+        <el-button type="primary" :loading="loading" native-type="submit">{{ $t('common.submit') }}</el-button>
+      </el-form-item>
+    </el-form>
+  </el-dialog>
+</template>
+
+<script>
+{{import}}
+
+export default {
+  name: '{{singular}}.update',
+  components: {
+{{components}}
+  },
+  data() {
+    return {
+      dialogVisible: false,
+      form: {},{{dataFormColumns}}
+      error: {},
+      loading: false
+    }
+  },
+  methods: {
+    init({{primaryId}}) {
+      const loading = this.$loading({
+        lock: true,
+        text: 'Loading',
+        spinner: 'el-icon-loading',
+        background: 'rgba(0, 0, 0, 0.7)'
+      })
+      {{singular}}Info({
+        {{primaryId}}: {{primaryId}}
+      }).then(response => {
+        this.form = response.data{{init}}
+        this.dialogVisible = true
+      }).finally(_ => {
+        loading.close()
+      })
+    },
+    handleUpdate() {
+      this.loading = true
+      this.error = {}
+      {{singular}}Update(this.form).then(response => {
+        this.$message({
+          showClose: true,
+          message: response.message,
+          type: 'success'
+        })
+        this.$emit('done', response.data)
+      }).catch(reason => {
+        const { data } = reason.response
+        if (data.code === 422) {
+          for (const k in data.data) {
+            this.error[k] = data.data[k].toString()
+          }
+        }
+      }).finally(_ => {
+        this.loading = false
+      })
+    }{{methods}}
+  }
+}
+</script>
+
+<style scoped>
+
+</style>

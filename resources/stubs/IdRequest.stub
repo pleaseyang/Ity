@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\{{module}}\{{model}};
+namespace App\Http\Requests\Admin\{{className}};
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -25,19 +25,19 @@ class IdRequest extends FormRequest
     public function rules(): array
     {
         return [
-            {{rules}}
+            '{{id}}' => ['required', '{{validate}}', Rule::exists('{{tableName}}')]
         ];
     }
 
     /**
-     * 获取已定义验证规则的错误消息。
+     * 获取验证错误的自定义属性。
      *
      * @return array
      */
     public function attributes(): array
     {
         return [
-            {{attributes}}
+            '{{id}}' => '{{message}}'
         ];
     }
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Admin\{{className}};
+namespace App\Http\Requests\Admin\GenTable;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -24,9 +24,15 @@ class UpdateRequest extends FormRequest
      */
     public function rules(): array
     {
-        {{idRequest}}
+        $id = $this->post('id', 0);
         return [
-            {{rules}}
+            'id' => ['required', 'integer', Rule::exists('gen_tables', 'id')],
+            'name' => ['required', 'string'],
+            'comment' => ['required', 'string'],
+            'engine' => ['required', 'string'],
+            'charset' => ['required', 'string'],
+            'collation' => ['required', 'string'],
+            'gen_table_columns' => ['required', 'array'],
         ];
     }
 
@@ -38,7 +44,13 @@ class UpdateRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            {{attributes}}
+            'id' => '自增ID',
+            'name' => __('message.gen.name'),
+            'comment' => __('message.gen.comment'),
+            'engine' => __('message.gen.engine'),
+            'charset' => __('message.gen.charset'),
+            'collation' => __('message.gen.collation'),
+            'gen_table_columns' => __('message.gen.gen_table_columns'),
         ];
     }
 

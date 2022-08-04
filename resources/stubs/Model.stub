@@ -5,20 +5,44 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
+use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 /**
- * App\Models\{{model}}
+ * App\Models\{{className}}
  */
-class {{model}} extends Model
+class {{className}} extends BaseModel
 {
     use HasFactory, LogsActivity;
 
-    protected static $logName = '{{dbName}}';
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = '{{tableName}}';
 
-    protected static $logFillable = true;
+    /**
+     * The primary key for the model.
+     *
+     * @var string
+     */
+    protected $primaryKey = '{{primaryKey}}';
 
-    protected static $logUnguarded = true;
+    /**
+     * The "type" of the primary key ID.
+     *
+     * @var string
+     */
+    protected $keyType = '{{keyType}}';
+
+    /**
+     * Indicates if the model should be timestamped.
+     *
+     * @var bool
+     */
+    public $timestamps = {{timestamps}};
 
     /**
      * The attributes that are mass assignable.
@@ -30,25 +54,50 @@ class {{model}} extends Model
     ];
 
     /**
+     * @return LogOptions
+     */
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('{{singular}}')
+            ->logFillable()
+            ->logUnguarded();
+    }
+
+    /**
      * 列表
      *
      * @param array $validated
      * @return array
      */
-    public static function getList(array $validated): array
+    public static function list(array $validated): array
     {
-        $model = {{model}}::when($validated['start_at'] ?? null, function (Builder $query) use ($validated): Builder {
-            return $query->whereBetween('{{dbName}}.created_at', [$validated['start_at'], $validated['end_at']]);
-        })->{{where}};
-        $total = $model->count('id');
+        $model = {{className}}::{{where}};
+        $total = $model->count('{{count}}');
         $data = $model
-            ->orderBy($validated['sort'] ?? '{{dbName}}.created_at', $validated['order'] === 'ascending' ? 'asc' : 'desc')
+            ->orderBy($validated['sort'] ?? '{{sort}}', $validated['order'] === 'ascending' ? 'asc' : 'desc')
             ->offset(($validated['offset'] - 1) * $validated['limit'])
             ->limit($validated['limit'])
+            ->select([
+                {{select}}
+            ])
             ->get();
         return [
             'data' => $data,
             'total' => $total
         ];
+    }
+
+
+    /**
+     * 列表
+     *
+     * @return Collection
+     */
+    public static function selectAll(): Collection
+    {
+        return {{className}}::select([
+            {{select}}
+        ])->get();
     }
 }

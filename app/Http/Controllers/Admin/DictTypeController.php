@@ -3,16 +3,17 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Admin\{{className}}\CreateRequest;
-use App\Http\Requests\Admin\{{className}}\GetListRequest;
-use App\Http\Requests\Admin\{{className}}\IdRequest;
-use App\Http\Requests\Admin\{{className}}\UpdateRequest;
+use App\Http\Requests\Admin\DictType\CreateRequest;
+use App\Http\Requests\Admin\DictType\GetListRequest;
+use App\Http\Requests\Admin\DictType\IdRequest;
+use App\Http\Requests\Admin\DictType\UpdateRequest;
 use App\Http\Response\ApiCode;
-use App\Models\{{className}};
+use App\Models\DictData;
+use App\Models\DictType;
 use MarcinOrlowski\ResponseBuilder\ResponseBuilder;
 use Symfony\Component\HttpFoundation\Response;
 
-class {{className}}Controller extends Controller
+class DictTypeController extends Controller
 {
     /**
      * 列表
@@ -25,7 +26,7 @@ class {{className}}Controller extends Controller
         $validated = $request->validated();
         return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
             ->withHttpCode(ApiCode::HTTP_OK)
-            ->withData({{className}}::list($validated))
+            ->withData(DictType::list($validated))
             ->withMessage(__('message.common.search.success'))
             ->build();
     }
@@ -40,7 +41,7 @@ class {{className}}Controller extends Controller
         return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
             ->withHttpCode(ApiCode::HTTP_OK)
             ->withData([
-                'data' => {{className}}::selectAll()
+                'select' => DictType::selectAll()
             ])
             ->withMessage(__('message.common.search.success'))
             ->build();
@@ -57,7 +58,7 @@ class {{className}}Controller extends Controller
         $validated = $request->validated();
         return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
             ->withHttpCode(ApiCode::HTTP_OK)
-            ->withData({{className}}::find($validated['id']))
+            ->withData(DictType::find($validated['id']))
             ->withMessage(__('message.common.search.success'))
             ->build();
     }
@@ -71,9 +72,10 @@ class {{className}}Controller extends Controller
     public function create(CreateRequest $request): Response
     {
         $validated = $request->validated();
+        DictData::forgetRedis();
         return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
             ->withHttpCode(ApiCode::HTTP_OK)
-            ->withData({{className}}::create($validated))
+            ->withData(DictType::create($validated))
             ->withMessage(__('message.common.create.success'))
             ->build();
     }
@@ -87,8 +89,9 @@ class {{className}}Controller extends Controller
     public function update(UpdateRequest $request): Response
     {
         $validated = $request->validated();
-        $model = {{className}}::find($validated['id']);
+        $model = DictType::find($validated['id']);
         $model->update($validated);
+        DictData::forgetRedis();
         return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
             ->withHttpCode(ApiCode::HTTP_OK)
             ->withData($model)
@@ -105,7 +108,8 @@ class {{className}}Controller extends Controller
     public function delete(IdRequest $request): Response
     {
         $validated = $request->validated();
-        {{className}}::where('id', $validated['id'])->delete();
+        DictType::whereId($validated['id'])->delete();
+        DictData::forgetRedis();
         return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
             ->withHttpCode(ApiCode::HTTP_OK)
             ->withMessage(__('message.common.delete.success'))

@@ -11,6 +11,8 @@ use App\Http\Response\ApiCode;
 use App\Util\FileSystem;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use LogicException;
 use MarcinOrlowski\ResponseBuilder\ResponseBuilder;
 use Symfony\Component\HttpFoundation\Response;
@@ -186,6 +188,104 @@ class FileSystemController extends Controller
         return ResponseBuilder::asError(ApiCode::HTTP_BAD_REQUEST)
             ->withHttpCode(ApiCode::HTTP_BAD_REQUEST)
             ->withMessage(__('message.common.delete.fail'))
+            ->build();
+    }
+
+    public function uploadImage(Request $request): Response
+    {
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            if (getimagesize($image) !== false) {
+                if ($path = $image->store('public/image')) {
+                    activity()
+                        ->useLog('file')
+                        ->causedBy($request->user())
+                        ->withProperties($image)
+                        ->log(':causer.name 上传图片');
+                    return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
+                        ->withHttpCode(ApiCode::HTTP_OK)
+                        ->withData([
+                            'path' => asset(Str::of($path)->replace('public', 'storage'))
+                        ])
+                        ->withMessage(__('message.common.upload.success'))
+                        ->build();
+                }
+            }
+            return ResponseBuilder::asError(ApiCode::HTTP_BAD_REQUEST)
+                ->withHttpCode(ApiCode::HTTP_BAD_REQUEST)
+                ->withMessage(__('message.common.upload.image_type_error'))
+                ->build();
+        }
+        return ResponseBuilder::asError(ApiCode::HTTP_BAD_REQUEST)
+            ->withHttpCode(ApiCode::HTTP_BAD_REQUEST)
+            ->withMessage(__('message.common.upload.need_image'))
+            ->build();
+    }
+
+    public function uploadFile(Request $request): Response
+    {
+        if ($request->hasFile('file')) {
+            $file = $request->file('file');
+            if ($file->extension() === 'bin') {
+                return ResponseBuilder::asError(ApiCode::HTTP_BAD_REQUEST)
+                    ->withHttpCode(ApiCode::HTTP_BAD_REQUEST)
+                    ->withMessage(__('message.common.upload.file_cannot_empty'))
+                    ->build();
+            }
+            if (in_array($file->extension(), [
+                'xls', 'xlsx', 'csv', 'pdf', 'doc', 'docx', 'txt', 'mp4'
+            ])) {
+                if ($path = $file->store('public/file')) {
+                    activity()
+                        ->useLog('file')
+                        ->causedBy($request->user())
+                        ->withProperties($file)
+                        ->log(':causer.name 上传文件');
+                    return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
+                        ->withHttpCode(ApiCode::HTTP_OK)
+                        ->withData([
+                            'path' => asset(Str::of($path)->replace('public', 'storage'))
+                        ])
+                        ->withMessage(__('message.common.upload.success'))
+                        ->build();
+                }
+            }
+            return ResponseBuilder::asError(ApiCode::HTTP_BAD_REQUEST)
+                ->withHttpCode(ApiCode::HTTP_BAD_REQUEST)
+                ->withMessage(__('message.common.upload.file_type_error'))
+                ->build();
+        }
+        return ResponseBuilder::asError(ApiCode::HTTP_BAD_REQUEST)
+            ->withHttpCode(ApiCode::HTTP_BAD_REQUEST)
+            ->withMessage(__('message.common.upload.need_file'))
+            ->build();
+    }
+
+    public function removeFile(Request $request): Response
+    {
+        $path = $request->post('path');
+        if ($path) {
+            $path = Str::of($path)->replace(config('app.url') . '/storage', 'public');
+            if (Storage::exists($path)) {
+                Storage::delete($path);
+                activity()
+                    ->useLog('file')
+                    ->causedBy($request->user())
+                    ->withProperties($path)
+                    ->log(':causer.name 删除文件');
+                return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
+                    ->withHttpCode(ApiCode::HTTP_OK)
+                    ->withMessage(__('message.common.delete.success'))
+                    ->build();
+            }
+            return ResponseBuilder::asError(ApiCode::HTTP_BAD_REQUEST)
+                ->withHttpCode(ApiCode::HTTP_BAD_REQUEST)
+                ->withMessage(__('message.common.upload.file_does_not_exist'))
+                ->build();
+        }
+        return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
+            ->withHttpCode(ApiCode::HTTP_OK)
+            ->withMessage(__('message.common.delete.success'))
             ->build();
     }
 }
