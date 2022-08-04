@@ -133,5 +133,20 @@ return [
             'warning' => '警告',
             'danger' => '危险',
         ]
+    ],
+    'gen' => [
+        'table' => '表',
+        'name' => '表名称',
+        'comment' => '表描述',
+        'pid' => '所属分类',
+        'engine' => '表引擎',
+        'charset' => '字符集',
+        'collation' => '排序规则',
+        'created_at_start' => '创建时间开始',
+        'created_at_end' => '创建时间结束',
+        'updated_at_start' => '更新时间开始',
+        'updated_at_end' => '更新时间结束',
+        'gen_table_columns' => '配置项',
+        'top_nav' => '顶级分类'
     ]
 ];

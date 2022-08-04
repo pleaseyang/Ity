@@ -45,15 +45,15 @@ class GetListRequest extends FormRequest
     public function attributes(): array
     {
         return array_merge((new CommonRequest())->attributes(), [
-            'name' => '表名称',
-            'comment' => '表描述',
-            'engine' => '表引擎',
-            'charset' => '字符集',
-            'collation' => '排序规则',
-            'created_at_start' => '创建时间开始',
-            'created_at_end' => '创建时间结束',
-            'updated_at_start' => '更新时间开始',
-            'updated_at_end' => '更新时间结束',
+            'name' => __('message.gen.name'),
+            'comment' => __('message.gen.comment'),
+            'engine' => __('message.gen.engine'),
+            'charset' => __('message.gen.charset'),
+            'collation' => __('message.gen.collation'),
+            'created_at_start' => __('message.gen.created_at_start'),
+            'created_at_end' => __('message.gen.created_at_end'),
+            'updated_at_start' => __('message.gen.updated_at_start'),
+            'updated_at_end' => __('message.gen.updated_at_end'),
         ]);
     }
 }

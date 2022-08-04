@@ -45,12 +45,12 @@ class UpdateRequest extends FormRequest
     {
         return [
             'id' => '自增ID',
-            'name' => '表名称',
-            'comment' => '表描述',
-            'engine' => '表引擎',
-            'charset' => '字符集',
-            'collation' => '排序规则',
-            'gen_table_columns' => '配置项',
+            'name' => __('message.gen.name'),
+            'comment' => __('message.gen.comment'),
+            'engine' => __('message.gen.engine'),
+            'charset' => __('message.gen.charset'),
+            'collation' => __('message.gen.collation'),
+            'gen_table_columns' => __('message.gen.gen_table_columns'),
         ];
     }
 

@@ -38,9 +38,9 @@ class GenRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'name' => '表名称',
-            'comment' => '表描述',
-            'pid' => '所属分类',
+            'name' => __('message.gen.name'),
+            'comment' => __('message.gen.comment'),
+            'pid' => __('message.gen.pid'),
         ];
     }
 

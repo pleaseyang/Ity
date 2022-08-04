@@ -37,7 +37,7 @@ class IdRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'id' => '自增ID'
+            'id' => 'ID'
         ];
     }
 

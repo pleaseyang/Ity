@@ -90,7 +90,7 @@ class GenTableController extends Controller
         $permission['icon'] = 'el-icon-star-on';
         $permission['name'] = 'top';
         $permission['pid'] = 0;
-        $permission['title'] = '顶级分类';
+        $permission['title'] = __('message.gen.top_nav');
         $children = Permission::tree(['guard_name' => 'admin', 'hidden' => 0]);
         $permission['children'] = $children;
         $doctrineSchemaManager = DB::connection()->getDoctrineSchemaManager();

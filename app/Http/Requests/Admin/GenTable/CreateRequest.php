@@ -37,7 +37,7 @@ class CreateRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'table' => '表',
+            'table' => __('message.gen.table'),
         ];
     }
 

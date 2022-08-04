@@ -132,5 +132,20 @@ return [
             'warning' => 'Warning',
             'danger' => 'Danger',
         ]
+    ],
+    'gen' => [
+        'table' => 'Table',
+        'name' => 'Name',
+        'comment' => 'Comment',
+        'pid' => 'Category',
+        'engine' => 'Engine',
+        'charset' => 'Charset',
+        'collation' => 'Collation',
+        'created_at_start' => 'Created At Start',
+        'created_at_end' => 'Created At End',
+        'updated_at_start' => 'Updated At Start',
+        'updated_at_end' => 'Updated At End',
+        'gen_table_columns' => 'Configuration Item',
+        'top_nav' => 'Top Nav'
     ]
 ];
