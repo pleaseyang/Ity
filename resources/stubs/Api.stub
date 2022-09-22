@@ -1,0 +1,9 @@
+<?php
+
+// {{permissionName}}
+Route::post('{{snake}}', [App\Http\Controllers\Admin\{{className}}Controller::class, 'list'])->middleware('permission:{{singular}}.{{snake}}');
+Route::post('{{singular}}', [App\Http\Controllers\Admin\{{className}}Controller::class, 'info'])->middleware('permission:{{singular}}.{{snake}}');
+Route::post('{{singular}}/select', [App\Http\Controllers\Admin\{{className}}Controller::class, 'select']);
+Route::post('{{singular}}/create', [App\Http\Controllers\Admin\{{className}}Controller::class, 'create'])->middleware('permission:{{singular}}.create');
+Route::post('{{singular}}/update', [App\Http\Controllers\Admin\{{className}}Controller::class, 'update'])->middleware('permission:{{singular}}.update');
+Route::post('{{singular}}/delete', [App\Http\Controllers\Admin\{{className}}Controller::class, 'delete'])->middleware('permission:{{singular}}.delete');

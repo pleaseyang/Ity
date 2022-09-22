@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Admin\{{className}};
+namespace App\Http\Requests\Admin\DictType;
 
 use App\Http\Requests\GetListRequest as CommonRequest;
 use Illuminate\Foundation\Http\FormRequest;
@@ -25,7 +25,9 @@ class GetListRequest extends FormRequest
     public function rules(): array
     {
         return array_merge((new CommonRequest())->rules(), [
-            {{rules}}
+            'name' => ['nullable', 'string'],
+            'type' => ['nullable', 'string'],
+            'status' => ['nullable', 'integer'],
         ]);
     }
 
@@ -37,7 +39,9 @@ class GetListRequest extends FormRequest
     public function attributes(): array
     {
         return array_merge((new CommonRequest())->attributes(), [
-            {{attributes}}
+            'name' => __('message.dict_type.name'),
+            'type' => __('message.dict_type.type'),
+            'status' => __('message.dict_type.status'),
         ]);
     }
 }

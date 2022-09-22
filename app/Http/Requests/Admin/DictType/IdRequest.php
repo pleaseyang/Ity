@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Admin\{{className}};
+namespace App\Http\Requests\Admin\DictType;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class CreateRequest extends FormRequest
+class IdRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -25,19 +25,18 @@ class CreateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            {{rules}}
+            'id' => ['required', 'integer', Rule::exists('dict_types')]
         ];
     }
 
     /**
-     * 获取已定义验证规则的错误消息。
+     * 获取验证错误的自定义属性。
      *
      * @return array
      */
     public function attributes(): array
     {
         return [
-            {{attributes}}
         ];
     }
 

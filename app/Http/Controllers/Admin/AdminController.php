@@ -252,4 +252,15 @@ class AdminController extends Controller
             ->withMessage(__('message.common.update.success'))
             ->build();
     }
+
+    public function select(): Response
+    {
+        return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
+            ->withHttpCode(ApiCode::HTTP_OK)
+            ->withData([
+                'select' => Admin::selectAll()
+            ])
+            ->withMessage(__('message.common.search.success'))
+            ->build();
+    }
 }
