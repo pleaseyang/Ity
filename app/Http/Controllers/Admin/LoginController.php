@@ -38,14 +38,10 @@ class LoginController extends Controller
     {
         try {
             $token = $this->guard()->refresh();
-            return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
-                ->withHttpCode(ApiCode::HTTP_OK)
-                ->withData($this->respondWithTokenData($token))
-                ->build();
+
+            return $this->output(ApiCode::HTTP_OK, $this->respondWithTokenData($token));
         } catch (JWTException $exception) {
-            return ResponseBuilder::asError(ApiCode::HTTP_TOKEN_EXPIRED)
-                ->withHttpCode(ApiCode::HTTP_TOKEN_EXPIRED)
-                ->build();
+            return $this->output(ApiCode::HTTP_TOKEN_EXPIRED);
         }
     }
 
@@ -70,10 +66,8 @@ class LoginController extends Controller
         $user['roles'] = $roles;
         // 未读消息数
         $user['unreadNotificationCount'] = $user->unreadNotifications()->count('id');
-        return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
-            ->withHttpCode(ApiCode::HTTP_OK)
-            ->withData($user)
-            ->build();
+
+        return $this->output(ApiCode::HTTP_OK, $user);
     }
 
     /**

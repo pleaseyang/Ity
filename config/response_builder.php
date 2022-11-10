@@ -11,6 +11,8 @@
  * @link      https://github.com/MarcinOrlowski/laravel-api-response-builder
  */
 
+use App\Http\Response\ApiCode;
+
 return [
     /*
     |-----------------------------------------------------------------------------------------------------------
@@ -26,20 +28,7 @@ return [
     |-----------------------------------------------------------------------------------------------------------
     |
     */
-    'map' => [
-        \App\Http\Response\ApiCode::HTTP_OK => 'api_code.ok',
-        \App\Http\Response\ApiCode::HTTP_NO_CONTENT => '',
-        \App\Http\Response\ApiCode::HTTP_BAD_REQUEST => 'api_code.bad_request',
-        \App\Http\Response\ApiCode::HTTP_UNAUTHORIZED => 'api_code.unauthorized',
-        \App\Http\Response\ApiCode::HTTP_FORBIDDEN => 'api_code.forbidden',
-        \App\Http\Response\ApiCode::HTTP_UNPROCESSABLE_ENTITY => 'api_code.unprocessable_entity',
-        \App\Http\Response\ApiCode::HTTP_SERVICE_UNAVAILABLE => 'api_code.service_unavailable',
-        \App\Http\Response\ApiCode::HTTP_INTERNAL_SERVER_ERROR => 'api_code.server_error',
-        \App\Http\Response\ApiCode::HTTP_TOO_MANY_REQUEST => 'api_code.too_many_request',
-        \App\Http\Response\ApiCode::HTTP_NOT_FOUND => 'api_code.not_found',
-        \App\Http\Response\ApiCode::HTTP_METHOD_NOT_ALLOWED => 'api_code.method_not_allowed',
-        \App\Http\Response\ApiCode::HTTP_TOKEN_EXPIRED => 'api_code.token_expired',
-    ],
+    'map' => ApiCode::$map,
 
     /*
     |-----------------------------------------------------------------------------------------------------------
