@@ -50,6 +50,32 @@ class LoginController extends Controller
     }
 
     /**
+     * Get the guard to be used during authentication.
+     *
+     * @return Guard
+     */
+    protected function guard(): Guard
+    {
+        return Auth::guard('admin');
+    }
+
+    /**
+     * Get the token array structure.
+     *
+     * @param string $token
+     *
+     * @return array
+     */
+    protected function respondWithTokenData(string $token): array
+    {
+        return [
+            'access_token' => $token,
+            'token_type' => 'bearer',
+            'expires_in' => $this->guard()->factory()->getTTL() * 60
+        ];
+    }
+
+    /**
      * Get the guard info
      *
      * @return Response
@@ -85,7 +111,10 @@ class LoginController extends Controller
     public function login(LoginRequest $request): Response
     {
         $credentials = $this->credentials($request);
-        if ($token = $this->guard()->attempt($credentials)) {
+        $field = filter_var($credentials[$this->username()], FILTER_VALIDATE_EMAIL) ? 'email' : $this->username();
+        $attempt[$field] = $credentials[$this->username()];
+        $attempt['password'] = $credentials['password'];
+        if ($token = $this->guard()->attempt($attempt)) {
             return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
                 ->withHttpCode(ApiCode::HTTP_OK)
                 ->withData($this->respondWithTokenData($token))
@@ -101,6 +130,16 @@ class LoginController extends Controller
     }
 
     /**
+     * Get the login username to be used by the controller.
+     *
+     * @return string
+     */
+    public function username(): string
+    {
+        return 'name';
+    }
+
+    /**
      * Log the user out of the application.
      *
      * @return Response
@@ -112,41 +151,5 @@ class LoginController extends Controller
             ->withHttpCode(ApiCode::HTTP_NO_CONTENT)
             ->withData()
             ->build();
-    }
-
-    /**
-     * Get the login username to be used by the controller.
-     *
-     * @return string
-     */
-    public function username(): string
-    {
-        return 'name';
-    }
-
-    /**
-     * Get the guard to be used during authentication.
-     *
-     * @return Guard
-     */
-    protected function guard(): Guard
-    {
-        return Auth::guard('admin');
-    }
-
-    /**
-     * Get the token array structure.
-     *
-     * @param string $token
-     *
-     * @return array
-     */
-    protected function respondWithTokenData(string $token): array
-    {
-        return [
-            'access_token' => $token,
-            'token_type' => 'bearer',
-            'expires_in' => $this->guard()->factory()->getTTL() * 60
-        ];
     }
 }
