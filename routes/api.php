@@ -30,6 +30,7 @@ Route::middleware([])->namespace('Home')->name('home.')->group(function () {
 });
 
 Route::middleware(['lang'])->prefix('admin')->name('admin.')->group(function () {
+    Route::post('setting', [LoginController::class, 'setting']);
     Route::post('login', [LoginController::class, 'login']);
     Route::post('logout', [LoginController::class, 'logout']);
     Route::post('refresh', [LoginController::class, 'refresh']);

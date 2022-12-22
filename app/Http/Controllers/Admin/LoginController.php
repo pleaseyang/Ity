@@ -26,7 +26,7 @@ class LoginController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth:admin')->except(['login', 'refresh']);
+        $this->middleware('auth:admin')->except(['login', 'refresh', 'setting']);
     }
 
     /**
@@ -75,6 +75,18 @@ class LoginController extends Controller
         ];
     }
 
+    public function setting(): Response
+    {
+        // TODO FROM DB
+        $setting = [];
+        $setting['title'] = config('app.name');
+        $setting['logo'] = asset('storage/logo.png');
+        return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
+            ->withHttpCode(ApiCode::HTTP_OK)
+            ->withData($setting)
+            ->build();
+    }
+
     /**
      * Get the guard info
      *
@@ -96,6 +108,15 @@ class LoginController extends Controller
         $user['roles'] = $roles;
         // 未读消息数
         $user['unreadNotificationCount'] = $user->unreadNotifications()->count('id');
+        // 配置信息
+        // TODO FROM DB
+        $user['config'] = [
+            'theme' => '#6959CD',
+            'tagsView' => true,
+            'fixedHeader' => true,
+            'sidebarLogo' => true,
+            'supportPinyinSearch' => true,
+        ];
         return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
             ->withHttpCode(ApiCode::HTTP_OK)
             ->withData($user)
