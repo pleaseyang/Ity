@@ -263,4 +263,24 @@ class AdminController extends Controller
             ->withMessage(__('message.common.search.success'))
             ->build();
     }
+
+    public function setting(Request $request): Response
+    {
+        /** @var Admin $admin */
+        $admin = $request->user('admin');
+        $key = $request->post('key');
+        $value = $request->post('value');
+        if (!in_array($key, ['theme', 'tags_view', 'fixed_header', 'sidebar_logo', 'support_pinyin_search'])) {
+            return ResponseBuilder::asError(ApiCode::HTTP_BAD_REQUEST)
+                ->withHttpCode(ApiCode::HTTP_BAD_REQUEST)
+                ->withMessage(__('message.common.update.fail'))
+                ->build();
+        }
+        $admin->$key = $value;
+        $admin->save();
+        return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
+            ->withHttpCode(ApiCode::HTTP_OK)
+            ->withMessage(__('message.common.update.success'))
+            ->build();
+    }
 }

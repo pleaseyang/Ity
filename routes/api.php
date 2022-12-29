@@ -89,6 +89,7 @@ Route::middleware(['lang'])->prefix('admin')->name('admin.')->group(function () 
             Route::post('admins', [AdminController::class, 'admins'])->middleware('permission:admin.admins');
             Route::post('admin', [AdminController::class, 'admin'])->middleware('permission:admin.admin');
             Route::post('admin/select', [AdminController::class, 'select']);
+            Route::post('admin/setting', [AdminController::class, 'setting']);
             // 操作记录
             Route::post('active/logs', [ActiveLogController::class, 'logs'])
                 ->middleware('permission:activeLog.activeLogs');

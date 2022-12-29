@@ -52,6 +52,16 @@ use stdClass;
  * @mixin \Eloquent
  * @property int $status 状态 1:正常 2:禁止
  * @method static Builder|Admin whereStatus($value)
+ * @property string $theme 主题色
+ * @property int $tags_view 开启 Tags-View 0关闭 1开启
+ * @property int $fixed_header 固定 Header 0关闭 1开启
+ * @property int $sidebar_logo 侧边栏 Logo 0关闭 1开启
+ * @property int $support_pinyin_search 菜单支持拼音搜索 0关闭 1开启
+ * @method static Builder|Admin whereFixedHeader($value)
+ * @method static Builder|Admin whereSidebarLogo($value)
+ * @method static Builder|Admin whereSupportPinyinSearch($value)
+ * @method static Builder|Admin whereTagsView($value)
+ * @method static Builder|Admin whereTheme($value)
  */
 class Admin extends Authenticatable implements JWTSubject
 {
@@ -63,7 +73,8 @@ class Admin extends Authenticatable implements JWTSubject
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password', 'status'
+        'name', 'email', 'password', 'status',
+        'theme', 'tags_view', 'fixed_header', 'sidebar_logo', 'support_pinyin_search'
     ];
 
     /**

@@ -109,13 +109,12 @@ class LoginController extends Controller
         // 未读消息数
         $user['unreadNotificationCount'] = $user->unreadNotifications()->count('id');
         // 配置信息
-        // TODO FROM DB
         $user['config'] = [
-            'theme' => '#6959CD',
-            'tagsView' => true,
-            'fixedHeader' => true,
-            'sidebarLogo' => true,
-            'supportPinyinSearch' => true,
+            'theme' => $user->theme,
+            'tagsView' => $user->tags_view === 1,
+            'fixedHeader' => $user->fixed_header === 1,
+            'sidebarLogo' => $user->sidebar_logo === 1,
+            'supportPinyinSearch' => $user->support_pinyin_search === 1,
         ];
         return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
             ->withHttpCode(ApiCode::HTTP_OK)
