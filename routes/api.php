@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\NginxController;
 use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\Admin\SystemController;
 use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -144,6 +145,8 @@ Route::middleware(['lang'])->prefix('admin')->name('admin.')->group(function () 
             Route::post('genTable/delete', [GenTableController::class, 'delete'])->middleware('permission:genTable.genTables');
             Route::post('genTable/gen', [GenTableController::class, 'gen'])->middleware('permission:genTable.genTables');
             Route::post('genTable/download', [GenTableController::class, 'download'])->middleware('permission:genTable.genTables');
+
+            Route::post('system/logo', [SystemController::class, 'logo'])->middleware('permission:systemConfig');
         });
     });
 });

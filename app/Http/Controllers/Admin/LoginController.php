@@ -77,10 +77,13 @@ class LoginController extends Controller
 
     public function setting(): Response
     {
-        // TODO FROM DB
         $setting = [];
         $setting['title'] = config('app.name');
-        $setting['logo'] = asset('storage/logo.png');
+        if (file_exists(storage_path('app/public/config/logo.png'))) {
+            $setting['logo'] = asset('storage/config/logo.png');
+        } else {
+            $setting['logo'] = asset('image/logo.png');
+        }
         return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
             ->withHttpCode(ApiCode::HTTP_OK)
             ->withData($setting)
