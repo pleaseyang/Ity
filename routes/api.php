@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\SystemController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -29,7 +30,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware([])->namespace('Home')->name('home.')->group(function () {
 });
-
+Route::post('notify/wechat/prepay', [Controller::class, 'wechatPayNotify']);
+Route::post('notify/wechat/refund', [Controller::class, 'wechatRefundNotify']);
 Route::middleware(['lang'])->prefix('admin')->name('admin.')->group(function () {
     Route::post('setting', [LoginController::class, 'setting']);
     Route::post('login', [LoginController::class, 'login']);
@@ -147,6 +149,14 @@ Route::middleware(['lang'])->prefix('admin')->name('admin.')->group(function () 
             Route::post('genTable/download', [GenTableController::class, 'download'])->middleware('permission:genTable.genTables');
 
             Route::post('system/logo', [SystemController::class, 'logo'])->middleware('permission:systemConfig');
+            Route::post('system/getConfig', [SystemController::class, 'getConfig'])->middleware('permission:systemConfig');
+            Route::post('system/aliOss', [SystemController::class, 'aliOss'])->middleware('permission:systemConfig');
+            Route::post('system/dingTalk', [SystemController::class, 'dingTalk'])->middleware('permission:systemConfig');
+            Route::post('system/wechat', [SystemController::class, 'wechat'])->middleware('permission:systemConfig');
+            Route::post('system/wechatPay', [SystemController::class, 'wechatPay'])->middleware('permission:systemConfig');
+            Route::post('system/wechatPayCheck', [SystemController::class, 'wechatPayCheck'])->middleware('permission:systemConfig');
+            Route::post('system/wechatPayTest', [SystemController::class, 'wechatPayTest'])->middleware('permission:systemConfig');
+            Route::post('system/randomKey', [SystemController::class, 'randomKey'])->middleware('permission:systemConfig');
         });
     });
 });
