@@ -2,16 +2,31 @@
 
 namespace App\Models;
 
+use AlibabaCloud\SDK\Dingtalk\Vcontact_1_0\Dingtalk as DingTalkV1;
+use AlibabaCloud\SDK\Dingtalk\Vcontact_1_0\Models\GetUserHeaders;
+use AlibabaCloud\SDK\Dingtalk\Voauth2_1_0\Dingtalk;
+use AlibabaCloud\SDK\Dingtalk\Voauth2_1_0\Models\GetUserTokenRequest;
+use AlibabaCloud\Tea\Utils\Utils\RuntimeOptions;
 use App\Util\FunctionReturn;
+use Carbon\Carbon;
+use Darabonba\OpenApi\Models\Config as DingTalkConfig;
+use Exception;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\RequestOptions;
+use GuzzleHttp\Utils;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\Builder as Query;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
+use Psr\SimpleCache\InvalidArgumentException;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Permission\Traits\HasRoles;
@@ -76,18 +91,6 @@ class Admin extends Authenticatable implements JWTSubject
         'name', 'email', 'password', 'status',
         'theme', 'tags_view', 'fixed_header', 'sidebar_logo', 'support_pinyin_search'
     ];
-
-    /**
-     * @return LogOptions
-     */
-    public function getActivitylogOptions(): LogOptions
-    {
-        return LogOptions::defaults()
-            ->useLogName('admin')
-            ->logFillable()
-            ->logUnguarded();
-    }
-
     /**
      * The attributes that should be hidden for arrays.
      *
@@ -96,7 +99,6 @@ class Admin extends Authenticatable implements JWTSubject
     protected $hidden = [
         'password', 'remember_token'
     ];
-
     /**
      * The attributes that should be cast to native types.
      *
@@ -105,26 +107,6 @@ class Admin extends Authenticatable implements JWTSubject
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
-
-    /**
-     * Get the identifier that will be stored in the subject claim of the JWT.
-     *
-     * @return mixed
-     */
-    public function getJWTIdentifier(): mixed
-    {
-        return $this->getKey();
-    }
-
-    /**
-     * Return a key value array, containing any custom claims to be added to the JWT.
-     *
-     * @return array
-     */
-    public function getJWTCustomClaims(): array
-    {
-        return ['role' => 'admin'];
-    }
 
     /**
      * 获取列表
@@ -226,5 +208,152 @@ class Admin extends Authenticatable implements JWTSubject
     public static function selectAll(): Collection
     {
         return Admin::select(['id', 'name'])->get();
+    }
+
+    /**
+     * @throws Exception
+     */
+    public static function getByDingTalk(array $user): Admin
+    {
+        $dingTalk = ModelHasDingtalk::whereUserid($user['result']['userid'])
+            ->where('model_type', Admin::class)
+            ->first();
+        if ($dingTalk === null) {
+            throw new Exception(__('auth.ding_talk.login_failed'));
+        }
+        ModelHasDingtalk::whereUserid($user['result']['userid'])
+            ->where('model_type', Admin::class)
+            ->update([
+                'name' => $user['result']['name'],
+                'avatar' => $user['result']['avatar'],
+                'admin' => $user['result']['admin'] ? 1 : 0,
+                'email' => $user['result']['email'] === '' ? null : $user['result']['email'],
+                'mobile' => $user['result']['mobile'] === '' ? null : $user['result']['mobile'],
+                'unionid' => $user['result']['unionid'],
+                'updated_at' => Carbon::now(),
+            ]);
+        return Admin::find($dingTalk->model_id);
+    }
+
+    public static function bindUrl(): string
+    {
+        $config = Config::getConfig('dingTalk');
+        $redirectUri = $config->where('key', 'redirect_bind_uri')->value('value');
+        $redirectUri = urlencode($redirectUri);
+        $clientId = $config->where('key', 'client_id')->value('value');
+        $corpId = $config->where('key', 'corp_id')->value('value');
+        $state = Str::uuid()->toString();
+        Cache::store('redis')->put('DingTalk:state:' . $state, '1', 300);
+        return 'https://login.dingtalk.com/oauth2/auth?redirect_uri=' . $redirectUri
+            . '&response_type=code&client_id=' . $clientId . '&scope=openid corpid&state=' . $state
+            . '&org_type=management&corpId=' . $corpId . '&prompt=consent&exclusiveLogin=true';
+    }
+
+    /**
+     * @throws Exception
+     * @throws GuzzleException
+     * @throws InvalidArgumentException
+     */
+    public function bindDingTalk(string $code, string $state): void
+    {
+        $res = ModelHasDingtalk::checkState($state);
+        if ($res === false) {
+            throw new Exception(__('auth.state_not_exists'));
+        }
+        Cache::store('redis')->forget('DingTalk:state:' . $state);
+        $config = Config::getConfig('dingTalk');
+        $clientId = $config->where('key', 'client_id')->value('value');
+        $clientSecret = $config->where('key', 'client_secret')->value('value');
+        // 获取个人token
+        $config = new DingTalkConfig([]);
+        $config->protocol = "https";
+        $config->regionId = "central";
+        $client = new Dingtalk($config);
+        $getAccessTokenRequest = new GetUserTokenRequest([
+            'clientId' => $clientId,
+            'clientSecret' => $clientSecret,
+            'code' => $code,
+            'grantType' => 'authorization_code'
+        ]);
+        $response = $client->getUserToken($getAccessTokenRequest);
+        // 获取unionId
+        $getUserHeaders = new GetUserHeaders([]);
+        $getUserHeaders->xAcsDingtalkAccessToken = $response->body->accessToken;
+        $client1 = new DingTalkV1($config);
+        $response = $client1->getUserWithOptions("me", $getUserHeaders, new RuntimeOptions([]));
+        // 根据unionId获取userId
+        $client2 = new Client([
+            'base_uri' => 'https://oapi.dingtalk.com',
+        ]);
+        $response = $client2->request('POST', '/topapi/user/getbyunionid', [
+            RequestOptions::QUERY => [
+                'access_token' => ModelHasDingtalk::getToken($clientId, $clientSecret)
+            ],
+            RequestOptions::JSON => [
+                'unionid' => $response->body->unionId
+            ]
+        ]);
+        $res = Utils::jsonDecode($response->getBody()->getContents(), true);
+        $userid = $res['result']['userid'];
+        // 根据userId获取信息
+        $response = $client2->request('POST', '/topapi/v2/user/get', [
+            RequestOptions::QUERY => [
+                'access_token' => ModelHasDingtalk::getToken($clientId, $clientSecret)
+            ],
+            RequestOptions::JSON => [
+                'userid' => $userid
+            ]
+        ]);
+        $res = Utils::jsonDecode($response->getBody()->getContents(), true);
+        $dingTalk = ModelHasDingtalk::whereUserid($res['result']['userid'])
+            ->where('model_type', Admin::class)
+            ->first();
+        if ($dingTalk !== null) {
+            throw new Exception(__('auth.ding_talk.bind_failed'));
+        }
+        ModelHasDingtalk::insert([
+            'model_type' => Admin::class,
+            'model_id' => $this->id,
+            'userid' => $res['result']['userid'],
+            'name' => $res['result']['name'],
+            'avatar' => $res['result']['avatar'],
+            'admin' => $res['result']['admin'] ? 1 : 0,
+            'email' => $res['result']['email'] === '' ? null : $res['result']['email'],
+            'mobile' => $res['result']['mobile'] === '' ? null : $res['result']['mobile'],
+            'unionid' => $res['result']['unionid'],
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now(),
+        ]);
+    }
+
+    /**
+     * @return LogOptions
+     */
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('admin')
+            ->logFillable()
+            ->logUnguarded();
+    }
+
+    /**
+     * Get the identifier that will be stored in the subject claim of the JWT.
+     *
+     * @return mixed
+     */
+    public function getJWTIdentifier(): mixed
+    {
+        return $this->getKey();
+    }
+
+    /**
+     * Return a key value array, containing any custom claims to be added to the JWT.
+     *
+     * @return array
+     */
+    public function getJWTCustomClaims(): array
+    {
+        return ['role' => 'admin'];
     }
 }

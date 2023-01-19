@@ -3,10 +3,15 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\CheckStateRequest;
+use App\Http\Requests\Admin\CodeLoginRequest;
 use App\Http\Requests\Admin\LoginRequest;
 use App\Http\Response\ApiCode;
 use App\Models\Admin;
+use App\Models\ModelHasDingtalk;
 use App\Util\Routes;
+use Exception;
+use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Support\Facades\Auth;
@@ -26,7 +31,11 @@ class LoginController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth:admin')->except(['login', 'refresh', 'setting']);
+        $this->middleware('auth:admin')->except([
+            'login', 'refresh',
+            'setting',
+            'dingTalkUrl', 'dingTalkCheckState', 'dingTalk', 'dingTalkCorpId', 'dingTalkDD'
+        ]);
     }
 
     /**
@@ -126,6 +135,92 @@ class LoginController extends Controller
     }
 
     /**
+     * Log the user out of the application.
+     *
+     * @return Response
+     */
+    public function logout(): Response
+    {
+        $this->guard()->logout();
+        return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
+            ->withHttpCode(ApiCode::HTTP_NO_CONTENT)
+            ->withData()
+            ->build();
+    }
+
+    public function dingTalkUrl(): Response
+    {
+        $url = ModelHasDingtalk::loginUrl();
+        return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
+            ->withHttpCode(ApiCode::HTTP_OK)
+            ->withData([
+                'url' => $url
+            ])
+            ->build();
+    }
+
+    public function dingTalkCheckState(CheckStateRequest $request): Response
+    {
+        $validated = $request->validated();
+        $state = $validated['state'];
+        return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
+            ->withHttpCode(ApiCode::HTTP_OK)
+            ->withData([
+                'check' => ModelHasDingtalk::checkState($state)
+            ])
+            ->build();
+    }
+
+    public function dingTalk(CodeLoginRequest $request): Response
+    {
+        $validated = $request->validated();
+        $state = $validated['state'];
+        $code = $validated['code'];
+        try {
+            $admin = ModelHasDingtalk::login($code, $state);
+            $token = $this->guard()->login($admin);
+            return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
+                ->withHttpCode(ApiCode::HTTP_OK)
+                ->withData($this->respondWithTokenData($token))
+                ->build();
+        } catch (Exception|GuzzleException|InvalidArgumentException $exception) {
+            return ResponseBuilder::asError(ApiCode::HTTP_BAD_REQUEST)
+                ->withHttpCode(ApiCode::HTTP_BAD_REQUEST)
+                ->withMessage($exception->getMessage())
+                ->build();
+        }
+    }
+
+    public function dingTalkCorpId(): Response
+    {
+        return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
+            ->withHttpCode(ApiCode::HTTP_OK)
+            ->withData([
+                'corpId' => ModelHasDingtalk::dingTalkCorpId()
+            ])
+            ->build();
+    }
+
+    public function dingTalkDD(CodeLoginRequest $request)
+    {
+        $validated = $request->validated();
+        $code = $validated['code'];
+        try {
+            $admin = ModelHasDingtalk::loginDD($code);
+            $token = $this->guard()->login($admin);
+            return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
+                ->withHttpCode(ApiCode::HTTP_OK)
+                ->withData($this->respondWithTokenData($token))
+                ->build();
+        } catch (Exception|GuzzleException|InvalidArgumentException $exception) {
+            return ResponseBuilder::asError(ApiCode::HTTP_BAD_REQUEST)
+                ->withHttpCode(ApiCode::HTTP_BAD_REQUEST)
+                ->withMessage($exception->getMessage())
+                ->build();
+        }
+    }
+
+    /**
      * Handle a login request to the application.
      *
      * @param LoginRequest $request
@@ -160,19 +255,5 @@ class LoginController extends Controller
     public function username(): string
     {
         return 'name';
-    }
-
-    /**
-     * Log the user out of the application.
-     *
-     * @return Response
-     */
-    public function logout(): Response
-    {
-        $this->guard()->logout();
-        return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
-            ->withHttpCode(ApiCode::HTTP_NO_CONTENT)
-            ->withData()
-            ->build();
     }
 }

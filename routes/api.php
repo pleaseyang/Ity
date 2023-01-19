@@ -37,6 +37,11 @@ Route::middleware(['lang'])->prefix('admin')->name('admin.')->group(function () 
     Route::post('login', [LoginController::class, 'login']);
     Route::post('logout', [LoginController::class, 'logout']);
     Route::post('refresh', [LoginController::class, 'refresh']);
+    Route::post('login/dingTalkUrl', [LoginController::class, 'dingTalkUrl']);
+    Route::post('login/dingTalkCheckState', [LoginController::class, 'dingTalkCheckState']);
+    Route::post('login/dingTalk', [LoginController::class, 'dingTalk']);
+    Route::post('login/dingTalkCorpId', [LoginController::class, 'dingTalkCorpId']);
+    Route::post('login/dingTalkDD', [LoginController::class, 'dingTalkDD']);
     Route::middleware(['jwt.role:admin', 'jwt.auth'])->group(function () {
         Route::post('me', [LoginController::class, 'me']);
         Route::post('notifications', [NotificationController::class, 'notifications']);
@@ -50,6 +55,8 @@ Route::middleware(['lang'])->prefix('admin')->name('admin.')->group(function () 
             Route::post('nav', [AdminController::class, 'nav']);
             Route::post('nav/set/noCache', [AdminController::class, 'navSetNoCache']);
             Route::post('nav/set/affix', [AdminController::class, 'navSetAffix']);
+            Route::post('bind/dingTalkUrl', [AdminController::class, 'dingTalkUrl']);
+            Route::post('bind/dingTalk', [AdminController::class, 'dingTalk']);
             // 权限
             Route::post('permission/create', [PermissionController::class, 'create'])
                 ->middleware('permission:permission.create');
