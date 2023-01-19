@@ -57,6 +57,7 @@ Route::middleware(['lang'])->prefix('admin')->name('admin.')->group(function () 
             Route::post('nav/set/affix', [AdminController::class, 'navSetAffix']);
             Route::post('bind/dingTalkUrl', [AdminController::class, 'dingTalkUrl']);
             Route::post('bind/dingTalk', [AdminController::class, 'dingTalk']);
+            Route::post('bind/dingTalkInfo', [AdminController::class, 'dingTalkInfo']);
             // 权限
             Route::post('permission/create', [PermissionController::class, 'create'])
                 ->middleware('permission:permission.create');

@@ -50,7 +50,7 @@ use Psr\SimpleCache\InvalidArgumentException;
  * @method static \Illuminate\Database\Eloquent\Builder|ModelHasDingtalk whereUserid($value)
  * @mixin \Eloquent
  */
-class ModelHasDingtalk extends Model
+class ModelHasDingtalk extends BaseModel
 {
     use HasFactory;
 

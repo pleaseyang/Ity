@@ -11,6 +11,7 @@ use App\Http\Requests\Admin\Admin\UpdateSelfRequest;
 use App\Http\Requests\Admin\CodeLoginRequest;
 use App\Http\Response\ApiCode;
 use App\Models\Admin;
+use App\Models\ModelHasDingtalk;
 use App\Models\Permission;
 use App\Notifications\PermissionChange;
 use App\Util\Routes;
@@ -316,5 +317,19 @@ class AdminController extends Controller
                 ->withMessage($exception->getMessage())
                 ->build();
         }
+    }
+
+    public function dingTalkInfo(Request $request): Response
+    {
+        /** @var Admin $admin */
+        $admin = $request->user('admin');
+        $info = ModelHasDingtalk::whereModelType(Admin::class)
+            ->where('model_id', $admin->id)
+            ->first();
+        return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
+            ->withHttpCode(ApiCode::HTTP_OK)
+            ->withData($info)
+            ->withMessage(__('message.common.search.success'))
+            ->build();
     }
 }
