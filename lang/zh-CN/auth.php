@@ -17,6 +17,7 @@ return [
     'refresh' => '登陆状态已失效 请重试',
     'state_not_exists' => 'state 参数校验失败，请重试',
     'bind_success' => '绑定成功',
+    'unbind_success' => '解绑成功',
     'ding_talk' => [
         'login_failed' => '登录失败，此钉钉没有绑定账号',
         'bind_failed' => '绑定失败，此钉钉已绑定账号'

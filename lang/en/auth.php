@@ -18,6 +18,7 @@ return [
     'refresh' => 'Login status is invalid. Please try again',
     'state_not_exists' => 'state Parameter verification failed, please try again',
     'bind_success' => 'Binding succeeded',
+    'unbind_success' => 'Unbinding succeeded',
     'ding_talk' => [
         'login_failed' => 'Login failed. This pin is not bound to an account',
         'bind_failed' => 'Binding failed. This nail has been bound to an account'

@@ -332,4 +332,17 @@ class AdminController extends Controller
             ->withMessage(__('message.common.search.success'))
             ->build();
     }
+
+    public function unbindDingTalk(Request $request): Response
+    {
+        /** @var Admin $admin */
+        $admin = $request->user('admin');
+        ModelHasDingtalk::whereModelType(Admin::class)
+            ->where('model_id', $admin->id)
+            ->delete();
+        return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
+            ->withHttpCode(ApiCode::HTTP_OK)
+            ->withMessage(__('auth.unbind_success'))
+            ->build();
+    }
 }
