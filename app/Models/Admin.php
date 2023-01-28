@@ -235,7 +235,7 @@ class Admin extends Authenticatable implements JWTSubject
         return Admin::find($dingTalk->model_id);
     }
 
-    public static function bindUrl(): string
+    public static function bindDingTalkUrl(): string
     {
         $config = Config::getConfig('dingTalk');
         $redirectUri = $config->where('key', 'redirect_bind_uri')->value('value');
@@ -321,6 +321,85 @@ class Admin extends Authenticatable implements JWTSubject
             'email' => $res['result']['email'] === '' ? null : $res['result']['email'],
             'mobile' => $res['result']['mobile'] === '' ? null : $res['result']['mobile'],
             'unionid' => $res['result']['unionid'],
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now(),
+        ]);
+    }
+
+    public static function bindWechatUrl(): array
+    {
+        $config = Config::getConfig('wechat');
+        $redirectUri = $config->where('key', 'oplatform_redirect_uri')->value('value');
+        $redirectUri = $redirectUri . '/#/profile/index';
+        $redirectUri = urlencode($redirectUri);
+        $appid = $config->where('key', 'oplatform_appid')->value('value');
+        $state = Str::uuid()->toString();
+        Cache::store('redis')->put('Wechat:state:' . $state, '1', 300);
+        return [
+            'url' => 'https://open.weixin.qq.com/connect/qrconnect?appid=' . $appid . '&redirect_uri=' . $redirectUri .
+                '&response_type=code&scope=snsapi_login&state=' . $state . '#wechat_redirect',
+            'appid' => $appid,
+            'redirect_uri' => $redirectUri,
+            'state' => $state,
+        ];
+    }
+
+    /**
+     * @throws GuzzleException
+     * @throws Exception
+     */
+    public function bindWechat(string $code, string $state, string $type): void
+    {
+        $res = ModelHasWechat::checkState($state);
+        if ($res === false) {
+            throw new Exception(__('auth.state_not_exists'));
+        }
+        Cache::store('redis')->forget('Wechat:state:' . $state);
+        $config = Config::getConfig('wechat');
+        $appid = $config->where('key', $type . '_appid')->value('value');
+        $secret = $config->where('key', $type . '_appsecret')->value('value');
+
+        // 第二步：通过 code 获取access_token
+        $client2 = new Client([
+            'base_uri' => 'https://api.weixin.qq.com',
+        ]);
+        $response = $client2->request('GET', '/sns/oauth2/access_token', [
+            RequestOptions::QUERY => [
+                'appid' => $appid,
+                'secret' => $secret,
+                'code' => $code,
+                'grant_type' => 'authorization_code',
+            ]
+        ]);
+        $res = Utils::jsonDecode($response->getBody()->getContents(), true);
+        if (isset($res['errcode'])) {
+            throw new Exception($res['errmsg']);
+        }
+
+        // 获取用户个人信息（UnionID机制）
+        $response = $client2->request('GET', '/sns/userinfo', [
+            RequestOptions::QUERY => [
+                'access_token' => $res['access_token'],
+                'openid' => $res['openid'],
+            ]
+        ]);
+        $res = Utils::jsonDecode($response->getBody()->getContents(), true);
+        if (isset($res['errcode'])) {
+            throw new Exception($res['errmsg']);
+        }
+
+        $wechat = ModelHasWechat::whereUnionid($res['unionid'])
+            ->where('model_type', Admin::class)
+            ->first();
+        if ($wechat !== null) {
+            throw new Exception(__('auth.wechat.bind_failed'));
+        }
+        ModelHasWechat::insert([
+            'model_type' => Admin::class,
+            'model_id' => $this->id,
+            'unionid' => $res['unionid'],
+            'nickname' => $res['nickname'],
+            'headimgurl' => $res['headimgurl'] === '' ? null : $res['headimgurl'],
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),
         ]);

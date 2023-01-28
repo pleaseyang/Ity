@@ -225,12 +225,9 @@ class LoginController extends Controller
 
     public function wechatUrl(): Response
     {
-        $url = ModelHasWechat::loginUrl();
         return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
             ->withHttpCode(ApiCode::HTTP_OK)
-            ->withData([
-                'url' => $url
-            ])
+            ->withData(ModelHasWechat::loginUrl())
             ->build();
     }
 

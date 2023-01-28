@@ -64,6 +64,10 @@ Route::middleware(['lang'])->prefix('admin')->name('admin.')->group(function () 
             Route::post('bind/dingTalk', [AdminController::class, 'dingTalk']);
             Route::post('bind/dingTalkInfo', [AdminController::class, 'dingTalkInfo']);
             Route::post('unbind/dingTalk', [AdminController::class, 'unbindDingTalk']);
+            Route::post('bind/wechatUrl', [AdminController::class, 'wechatUrl']);
+            Route::post('bind/wechat', [AdminController::class, 'wechat']);
+            Route::post('bind/wechatInfo', [AdminController::class, 'wechatInfo']);
+            Route::post('unbind/wechat', [AdminController::class, 'unbindWechat']);
             // 权限
             Route::post('permission/create', [PermissionController::class, 'create'])
                 ->middleware('permission:permission.create');

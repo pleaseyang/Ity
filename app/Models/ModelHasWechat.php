@@ -55,7 +55,7 @@ class ModelHasWechat extends BaseModel
         'model_type', 'model_id', 'unionid', 'nickname', 'headimgurl'
     ];
 
-    public static function loginUrl(): string
+    public static function loginUrl(): array
     {
         $config = Config::getConfig('wechat');
         $redirectUri = $config->where('key', 'oplatform_redirect_uri')->value('value');
@@ -64,8 +64,13 @@ class ModelHasWechat extends BaseModel
         $appid = $config->where('key', 'oplatform_appid')->value('value');
         $state = Str::uuid()->toString();
         Cache::store('redis')->put('Wechat:state:' . $state, '1', 300);
-        return 'https://open.weixin.qq.com/connect/qrconnect?appid=' . $appid . '&redirect_uri=' . $redirectUri .
-            '&response_type=code&scope=snsapi_login&state=' . $state . '#wechat_redirect';
+        return [
+            'url' => 'https://open.weixin.qq.com/connect/qrconnect?appid=' . $appid . '&redirect_uri=' . $redirectUri .
+                '&response_type=code&scope=snsapi_login&state=' . $state . '#wechat_redirect',
+            'appid' => $appid,
+            'redirect_uri' => $redirectUri,
+            'state' => $state,
+        ];
     }
 
     public static function loginUrlOffiaccount(): string
