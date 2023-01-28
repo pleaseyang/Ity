@@ -9,7 +9,6 @@ use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\RequestOptions;
 use GuzzleHttp\Utils;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Psr\SimpleCache\InvalidArgumentException;
@@ -53,7 +52,7 @@ class ModelHasWechat extends BaseModel
      * @var array
      */
     protected $fillable = [
-        'model_type', 'model_id', 'userid', 'name', 'avatar', 'admin', 'email', 'mobile', 'unionid'
+        'model_type', 'model_id', 'unionid', 'nickname', 'headimgurl'
     ];
 
     public static function loginUrl(): string
@@ -69,13 +68,17 @@ class ModelHasWechat extends BaseModel
             '&response_type=code&scope=snsapi_login&state=' . $state . '#wechat_redirect';
     }
 
-    public static function checkState(string $state): bool
+    public static function loginUrlOffiaccount(): string
     {
-        try {
-            return Cache::store('redis')->has('Wechat:state:' . $state);
-        } catch (InvalidArgumentException) {
-            return false;
-        }
+        $config = Config::getConfig('wechat');
+        $redirectUri = $config->where('key', 'offiaccount_redirect_uri')->value('value');
+        $redirectUri = $redirectUri . '/#/profile/index';
+        $redirectUri = urlencode($redirectUri);
+        $appid = $config->where('key', 'offiaccount_appid')->value('value');
+        $state = Str::uuid()->toString();
+        Cache::store('redis')->put('Wechat:state:' . $state, '1', 300);
+        return 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=' . $appid . '&redirect_uri=' . $redirectUri .
+            '&response_type=code&scope=snsapi_userinfo&state=' . $state . '#wechat_redirect';
     }
 
     /**
@@ -125,6 +128,15 @@ class ModelHasWechat extends BaseModel
         return self::getByWechat($res);
     }
 
+    public static function checkState(string $state): bool
+    {
+        try {
+            return Cache::store('redis')->has('Wechat:state:' . $state);
+        } catch (InvalidArgumentException) {
+            return false;
+        }
+    }
+
     /**
      * @throws Exception
      */
@@ -144,18 +156,5 @@ class ModelHasWechat extends BaseModel
                 'updated_at' => Carbon::now(),
             ]);
         return Admin::find($wechat->model_id);
-    }
-
-    public static function loginUrlOffiaccount(): string
-    {
-        $config = Config::getConfig('wechat');
-        $redirectUri = $config->where('key', 'offiaccount_redirect_uri')->value('value');
-        $redirectUri = $redirectUri . '/#/profile/index';
-        $redirectUri = urlencode($redirectUri);
-        $appid = $config->where('key', 'offiaccount_appid')->value('value');
-        $state = Str::uuid()->toString();
-        Cache::store('redis')->put('Wechat:state:' . $state, '1', 300);
-        return 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=' . $appid . '&redirect_uri=' . $redirectUri .
-            '&response_type=code&scope=snsapi_userinfo&state=' . $state . '#wechat_redirect';
     }
 }
