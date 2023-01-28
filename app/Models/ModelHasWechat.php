@@ -72,7 +72,7 @@ class ModelHasWechat extends BaseModel
     {
         $config = Config::getConfig('wechat');
         $redirectUri = $config->where('key', 'offiaccount_redirect_uri')->value('value');
-        $redirectUri = $redirectUri . '/#/profile/index';
+        $redirectUri = $redirectUri . '/#/login';
         $redirectUri = urlencode($redirectUri);
         $appid = $config->where('key', 'offiaccount_appid')->value('value');
         $state = Str::uuid()->toString();
