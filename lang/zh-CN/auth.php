@@ -21,5 +21,9 @@ return [
     'ding_talk' => [
         'login_failed' => '登录失败，此钉钉没有绑定账号',
         'bind_failed' => '绑定失败，此钉钉已绑定账号'
+    ],
+    'wechat' => [
+        'login_failed' => '登录失败，此微信没有绑定账号',
+        'bind_failed' => '绑定失败，此微信已绑定账号'
     ]
 ];

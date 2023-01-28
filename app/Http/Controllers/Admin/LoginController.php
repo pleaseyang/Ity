@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\CheckStateRequest;
 use App\Http\Requests\Admin\CodeLoginRequest;
 use App\Http\Requests\Admin\LoginRequest;
+use App\Http\Requests\Admin\WechatCodeLoginRequest;
 use App\Http\Response\ApiCode;
 use App\Models\Admin;
 use App\Models\ModelHasDingtalk;
+use App\Models\ModelHasWechat;
 use App\Util\Routes;
 use Exception;
 use GuzzleHttp\Exception\GuzzleException;
@@ -34,7 +36,8 @@ class LoginController extends Controller
         $this->middleware('auth:admin')->except([
             'login', 'refresh',
             'setting',
-            'dingTalkUrl', 'dingTalkCheckState', 'dingTalk', 'dingTalkCorpId', 'dingTalkDD'
+            'dingTalkUrl', 'dingTalkCheckState', 'dingTalk', 'dingTalkCorpId', 'dingTalkDD',
+            'wechatUrl', 'wechatCheckState', 'wechat', 'wechatUrlOffiaccount', 'wechatOffiaccount'
         ]);
     }
 
@@ -218,6 +221,61 @@ class LoginController extends Controller
                 ->withMessage($exception->getMessage())
                 ->build();
         }
+    }
+
+    public function wechatUrl(): Response
+    {
+        $url = ModelHasWechat::loginUrl();
+        return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
+            ->withHttpCode(ApiCode::HTTP_OK)
+            ->withData([
+                'url' => $url
+            ])
+            ->build();
+    }
+
+    public function wechatCheckState(CheckStateRequest $request): Response
+    {
+        $validated = $request->validated();
+        $state = $validated['state'];
+        return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
+            ->withHttpCode(ApiCode::HTTP_OK)
+            ->withData([
+                'check' => ModelHasWechat::checkState($state)
+            ])
+            ->build();
+    }
+
+    public function wechat(WechatCodeLoginRequest $request): Response
+    {
+        $validated = $request->validated();
+        $state = $validated['state'];
+        $code = $validated['code'];
+        $type = $validated['type'];
+        try {
+            $admin = ModelHasWechat::login($code, $state, $type);
+            $token = $this->guard()->login($admin);
+            return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
+                ->withHttpCode(ApiCode::HTTP_OK)
+                ->withData($this->respondWithTokenData($token))
+                ->build();
+        } catch (Exception|GuzzleException|InvalidArgumentException $exception) {
+            return ResponseBuilder::asError(ApiCode::HTTP_BAD_REQUEST)
+                ->withHttpCode(ApiCode::HTTP_BAD_REQUEST)
+                ->withMessage($exception->getMessage())
+                ->build();
+        }
+    }
+
+    public function wechatUrlOffiaccount(): Response
+    {
+        $url = ModelHasWechat::loginUrlOffiaccount();
+        return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
+            ->withHttpCode(ApiCode::HTTP_OK)
+            ->withData([
+                'url' => $url
+            ])
+            ->build();
     }
 
     /**

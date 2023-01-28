@@ -42,6 +42,11 @@ Route::middleware(['lang'])->prefix('admin')->name('admin.')->group(function () 
     Route::post('login/dingTalk', [LoginController::class, 'dingTalk']);
     Route::post('login/dingTalkCorpId', [LoginController::class, 'dingTalkCorpId']);
     Route::post('login/dingTalkDD', [LoginController::class, 'dingTalkDD']);
+    Route::post('login/wechatUrl', [LoginController::class, 'wechatUrl']);
+    Route::post('login/wechatCheckState', [LoginController::class, 'wechatCheckState']);
+    Route::post('login/wechat', [LoginController::class, 'wechat']);
+    Route::post('login/wechatUrlOffiaccount', [LoginController::class, 'wechatUrlOffiaccount']);
+    Route::post('login/wechatOffiaccount', [LoginController::class, 'wechatOffiaccount']);
     Route::middleware(['jwt.role:admin', 'jwt.auth'])->group(function () {
         Route::post('me', [LoginController::class, 'me']);
         Route::post('notifications', [NotificationController::class, 'notifications']);
