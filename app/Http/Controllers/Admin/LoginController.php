@@ -103,6 +103,7 @@ class LoginController extends Controller
         $dingTalkOpen = $dingTalk->where('key', 'open')->value('value') === '1';
         $setting['wechat_open'] = $wechatOpen;
         $setting['ding_talk_open'] = $dingTalkOpen;
+        $setting['version'] = config('app.version');
         return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
             ->withHttpCode(ApiCode::HTTP_OK)
             ->withData($setting)
