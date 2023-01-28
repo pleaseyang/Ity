@@ -9,6 +9,7 @@ use App\Http\Requests\Admin\LoginRequest;
 use App\Http\Requests\Admin\WechatCodeLoginRequest;
 use App\Http\Response\ApiCode;
 use App\Models\Admin;
+use App\Models\Config;
 use App\Models\ModelHasDingtalk;
 use App\Models\ModelHasWechat;
 use App\Util\Routes;
@@ -96,6 +97,12 @@ class LoginController extends Controller
         } else {
             $setting['logo'] = asset('image/logo.png');
         }
+        $wechat = Config::getConfig('wechat');
+        $wechatOpen = $wechat->where('key', 'open')->value('value') === '1';
+        $dingTalk = Config::getConfig('dingTalk');
+        $dingTalkOpen = $dingTalk->where('key', 'open')->value('value') === '1';
+        $setting['wechat_open'] = $wechatOpen;
+        $setting['ding_talk_open'] = $dingTalkOpen;
         return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
             ->withHttpCode(ApiCode::HTTP_OK)
             ->withData($setting)
