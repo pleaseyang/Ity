@@ -33,6 +33,18 @@ class FileSystemController extends Controller
         $offset = $request->post('offset', 0) ?? 0;
         $length = $request->post('length', 100) ?? 100;
         $offset = ($offset - 1 < 0 ? 0 : $offset - 1) * $length;
+        if ($directory === '/cert/') {
+            return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
+                ->withHttpCode(ApiCode::HTTP_OK)
+                ->withData([
+                    'data' => [
+                        ['lastModified' => '', 'name' => ['/', 'cert'], 'pathinfo' => ['extension' => 'path'], 'size' => '', 'type' => 'path']
+                    ],
+                    'total' => 0
+                ])
+                ->withMessage(__('message.common.search.success'))
+                ->build();
+        }
         $fileSystem = new FileSystem($directory);
         return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
             ->withHttpCode(ApiCode::HTTP_OK)

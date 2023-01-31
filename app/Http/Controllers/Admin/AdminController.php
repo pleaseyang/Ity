@@ -8,12 +8,17 @@ use App\Http\Requests\Admin\Admin\GetListRequest;
 use App\Http\Requests\Admin\Admin\SyncPermissionsRequest;
 use App\Http\Requests\Admin\Admin\UpdateRequest;
 use App\Http\Requests\Admin\Admin\UpdateSelfRequest;
+use App\Http\Requests\Admin\CodeLoginRequest;
+use App\Http\Requests\Admin\WechatCodeLoginRequest;
 use App\Http\Response\ApiCode;
 use App\Models\Admin;
+use App\Models\ModelHasDingtalk;
+use App\Models\ModelHasWechat;
 use App\Models\Permission;
 use App\Notifications\PermissionChange;
 use App\Util\Routes;
 use Exception;
+use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use MarcinOrlowski\ResponseBuilder\ResponseBuilder;
@@ -261,6 +266,142 @@ class AdminController extends Controller
                 'select' => Admin::selectAll()
             ])
             ->withMessage(__('message.common.search.success'))
+            ->build();
+    }
+
+    public function setting(Request $request): Response
+    {
+        /** @var Admin $admin */
+        $admin = $request->user('admin');
+        $key = $request->post('key');
+        $value = $request->post('value');
+        if (!in_array($key, ['theme', 'tags_view', 'fixed_header', 'sidebar_logo', 'support_pinyin_search'])) {
+            return ResponseBuilder::asError(ApiCode::HTTP_BAD_REQUEST)
+                ->withHttpCode(ApiCode::HTTP_BAD_REQUEST)
+                ->withMessage(__('message.common.update.fail'))
+                ->build();
+        }
+        $admin->$key = $value;
+        $admin->save();
+        return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
+            ->withHttpCode(ApiCode::HTTP_OK)
+            ->withMessage(__('message.common.update.success'))
+            ->build();
+    }
+
+    public function dingTalkUrl(): Response
+    {
+        $url = Admin::bindDingTalkUrl();
+        return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
+            ->withHttpCode(ApiCode::HTTP_OK)
+            ->withData([
+                'url' => $url
+            ])
+            ->build();
+    }
+
+    public function dingTalk(CodeLoginRequest $request): Response
+    {
+        /** @var Admin $admin */
+        $admin = $request->user('admin');
+        $validated = $request->validated();
+        $state = $validated['state'];
+        $code = $validated['code'];
+        try {
+            $admin->bindDingTalk($code, $state);
+            return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
+                ->withHttpCode(ApiCode::HTTP_OK)
+                ->withMessage(__('auth.bind_success'))
+                ->build();
+        } catch (Exception|GuzzleException|InvalidArgumentException $exception) {
+            return ResponseBuilder::asError(ApiCode::HTTP_BAD_REQUEST)
+                ->withHttpCode(ApiCode::HTTP_BAD_REQUEST)
+                ->withMessage($exception->getMessage())
+                ->build();
+        }
+    }
+
+    public function dingTalkInfo(Request $request): Response
+    {
+        /** @var Admin $admin */
+        $admin = $request->user('admin');
+        $info = ModelHasDingtalk::whereModelType(Admin::class)
+            ->where('model_id', $admin->id)
+            ->first();
+        return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
+            ->withHttpCode(ApiCode::HTTP_OK)
+            ->withData($info)
+            ->withMessage(__('message.common.search.success'))
+            ->build();
+    }
+
+    public function unbindDingTalk(Request $request): Response
+    {
+        /** @var Admin $admin */
+        $admin = $request->user('admin');
+        ModelHasDingtalk::whereModelType(Admin::class)
+            ->where('model_id', $admin->id)
+            ->delete();
+        return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
+            ->withHttpCode(ApiCode::HTTP_OK)
+            ->withMessage(__('auth.unbind_success'))
+            ->build();
+    }
+
+    public function wechatUrl(): Response
+    {
+        return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
+            ->withHttpCode(ApiCode::HTTP_OK)
+            ->withData(Admin::bindWechatUrl())
+            ->build();
+    }
+
+    public function wechat(WechatCodeLoginRequest $request): Response
+    {
+        /** @var Admin $admin */
+        $admin = $request->user('admin');
+        $validated = $request->validated();
+        $state = $validated['state'];
+        $code = $validated['code'];
+        $type = $validated['type'];
+        try {
+            $admin->bindWechat($code, $state, $type);
+            return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
+                ->withHttpCode(ApiCode::HTTP_OK)
+                ->withMessage(__('auth.bind_success'))
+                ->build();
+        } catch (Exception|GuzzleException|InvalidArgumentException $exception) {
+            return ResponseBuilder::asError(ApiCode::HTTP_BAD_REQUEST)
+                ->withHttpCode(ApiCode::HTTP_BAD_REQUEST)
+                ->withMessage($exception->getMessage())
+                ->build();
+        }
+    }
+
+    public function wechatInfo(Request $request): Response
+    {
+        /** @var Admin $admin */
+        $admin = $request->user('admin');
+        $info = ModelHasWechat::whereModelType(Admin::class)
+            ->where('model_id', $admin->id)
+            ->first();
+        return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
+            ->withHttpCode(ApiCode::HTTP_OK)
+            ->withData($info)
+            ->withMessage(__('message.common.search.success'))
+            ->build();
+    }
+
+    public function unbindWechat(Request $request): Response
+    {
+        /** @var Admin $admin */
+        $admin = $request->user('admin');
+        ModelHasWechat::whereModelType(Admin::class)
+            ->where('model_id', $admin->id)
+            ->delete();
+        return ResponseBuilder::asSuccess(ApiCode::HTTP_OK)
+            ->withHttpCode(ApiCode::HTTP_OK)
+            ->withMessage(__('auth.unbind_success'))
             ->build();
     }
 }

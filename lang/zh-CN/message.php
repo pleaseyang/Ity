@@ -148,5 +148,43 @@ return [
         'updated_at_end' => '更新时间结束',
         'gen_table_columns' => '配置项',
         'top_nav' => '顶级分类'
-    ]
+    ],
+    'config' => [
+        'type' => '类型',
+        'aliOss' => [
+            'access_key_id' => '标识用户',
+            'access_key_secret' => '验证用户的密钥',
+            'bucket_name' => '存储空间名称',
+            'endpoint' => '地域节点',
+            'fail' => '保存阿里云OSS配置失败，原因：:message',
+            'bucket_not_exists' => '保存阿里云OSS配置失败，原因：存储空间名称不存在'
+        ],
+        'dingTalk' => [
+            'open' => '钉钉登录',
+            'client_id' => 'AppKey',
+            'client_secret' => 'AppSecret',
+            'corp_id' => 'corpId',
+            'redirect_uri' => '回调URL',
+            'redirect_bind_uri' => '绑定回调URL',
+            'fail' => '保存钉钉登录配置失败，原因：:message',
+        ],
+        'wechat' => [
+            'open' => '微信登录',
+            'offiaccount_appid' => 'Appid',
+            'offiaccount_appsecret' => 'AppSecret',
+            'offiaccount_redirect_uri' => '回调地址',
+            'oplatform_appid' => 'Appid',
+            'oplatform_appsecret' => 'AppSecret',
+            'oplatform_redirect_uri' => '回调地址',
+            'fail' => '保存微信登录配置失败，原因：:message',
+        ],
+        'wechatPay' => [
+            'api_v3key' => 'APIv3密钥',
+            'zip' => '商户证书压缩包',
+            'zip_fail' => '解压失败',
+            'zip_miss_file' => '压缩包缺少文件 :data',
+            'appid' => 'APPID',
+            'notify_url' => '回调域名',
+        ]
+    ],
 ];

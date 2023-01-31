@@ -2,7 +2,7 @@
 基于laravel+vue的基础后台, 前后端分离, 欢迎fork&start&pull requests
 
 ## DEMO
-[http://pleaseyang.gitee.io/ity-show](http://pleaseyang.gitee.io/ity-show)
+[https://ityphp.newbanri.com/](https://ityphp.newbanri.com/)
 
 账号 look 密码 123456
 
@@ -86,9 +86,6 @@ LARAVEL Notifiable Trait 搭建
 2. LINUX: `php artisan workerman start --d`
 3. URI: `ws://IP:2346?lang=LANG&token=TOKEN`
 4. SEND: `{"route": "route.name", "data": data}`
-
-## 备注
-master :laravel最新版本的分支. 其余以laravel版本号进行命名
 
 ## 致谢
 * [jetbrains](https://www.jetbrains.com) ![](.github/jetbrains.svg)

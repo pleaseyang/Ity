@@ -147,5 +147,43 @@ return [
         'updated_at_end' => 'Updated At End',
         'gen_table_columns' => 'Configuration Item',
         'top_nav' => 'Top Nav'
-    ]
+    ],
+    'config' => [
+        'type' => 'Type',
+        'aliOss' => [
+            'access_key_id' => 'access key id',
+            'access_key_secret' => 'access key secret',
+            'bucket_name' => 'bucket name',
+            'endpoint' => 'endpoint',
+            'fail' => 'Save ALIOSS config fail, Reason  :message',
+            'bucket_not_exists' => 'Save ALIOSS config fail, Reason bucket name don\'t exists'
+        ],
+        'dingTalk' => [
+            'open' => 'DingTalk Login',
+            'client_id' => 'AppKey',
+            'client_secret' => 'AppSecret',
+            'corp_id' => 'CorpId',
+            'redirect_uri' => 'redirect uri',
+            'redirect_bind_uri' => 'redirect bind uri',
+            'fail' => 'Save DingTalk Login config fail, Reason :message',
+        ],
+        'wechat' => [
+            'open' => 'WeChat Login',
+            'offiaccount_appid' => 'Appid',
+            'offiaccount_appsecret' => 'AppSecret',
+            'offiaccount_redirect_uri' => 'redirect uri',
+            'oplatform_appid' => 'Appid',
+            'oplatform_appsecret' => 'AppSecret',
+            'oplatform_redirect_uri' => 'redirect uri',
+            'fail' => 'Save WeChat Login config fail, Reason :message',
+        ],
+        'wechatPay' => [
+            'api_v3key' => 'APIv3',
+            'zip' => 'Merchant certificate compression package',
+            'zip_fail' => 'Decompression failed',
+            'zip_miss_file' => 'The package is missing files :data',
+            'appid' => 'APPID',
+            'notify_url' => 'notify url',
+        ]
+    ],
 ];
