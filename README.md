@@ -2,7 +2,7 @@
 基于laravel+vue的基础后台, 前后端分离, 欢迎fork&start&pull requests
 
 ## DEMO
-[http://pleaseyang.gitee.io/ity-show](http://pleaseyang.gitee.io/ity-show)
+[https://ityphp.newbanri.com/](https://ityphp.newbanri.com/)
 
 账号 look 密码 123456
 
