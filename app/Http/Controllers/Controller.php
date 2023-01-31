@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\View;
 use MarcinOrlowski\ResponseBuilder\ResponseBuilder;
 use Symfony\Component\HttpFoundation\Response;
 use TypeError;
@@ -24,6 +25,12 @@ use WeChatPay\Formatter;
 class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
+
+    public function page(): \Illuminate\Contracts\View\View
+    {
+        View::addExtension('html', 'php');
+        return view()->file(public_path('index.html'));
+    }
 
     public function wechatPayNotify(Request $request): Response
     {
