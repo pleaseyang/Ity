@@ -12,7 +12,9 @@ use App\Http\Controllers\Admin\NginxController;
 use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\Admin\SystemController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -28,11 +30,23 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware([])->namespace('Home')->name('home.')->group(function () {
 });
-
+Route::post('notify/wechat/prepay', [Controller::class, 'wechatPayNotify']);
+Route::post('notify/wechat/refund', [Controller::class, 'wechatRefundNotify']);
 Route::middleware(['lang'])->prefix('admin')->name('admin.')->group(function () {
+    Route::post('setting', [LoginController::class, 'setting']);
     Route::post('login', [LoginController::class, 'login']);
     Route::post('logout', [LoginController::class, 'logout']);
     Route::post('refresh', [LoginController::class, 'refresh']);
+    Route::post('login/dingTalkUrl', [LoginController::class, 'dingTalkUrl']);
+    Route::post('login/dingTalkCheckState', [LoginController::class, 'dingTalkCheckState']);
+    Route::post('login/dingTalk', [LoginController::class, 'dingTalk']);
+    Route::post('login/dingTalkCorpId', [LoginController::class, 'dingTalkCorpId']);
+    Route::post('login/dingTalkDD', [LoginController::class, 'dingTalkDD']);
+    Route::post('login/wechatUrl', [LoginController::class, 'wechatUrl']);
+    Route::post('login/wechatCheckState', [LoginController::class, 'wechatCheckState']);
+    Route::post('login/wechat', [LoginController::class, 'wechat']);
+    Route::post('login/wechatUrlOffiaccount', [LoginController::class, 'wechatUrlOffiaccount']);
+    Route::post('login/wechatOffiaccount', [LoginController::class, 'wechatOffiaccount']);
     Route::middleware(['jwt.role:admin', 'jwt.auth'])->group(function () {
         Route::post('me', [LoginController::class, 'me']);
         Route::post('notifications', [NotificationController::class, 'notifications']);
@@ -46,6 +60,14 @@ Route::middleware(['lang'])->prefix('admin')->name('admin.')->group(function () 
             Route::post('nav', [AdminController::class, 'nav']);
             Route::post('nav/set/noCache', [AdminController::class, 'navSetNoCache']);
             Route::post('nav/set/affix', [AdminController::class, 'navSetAffix']);
+            Route::post('bind/dingTalkUrl', [AdminController::class, 'dingTalkUrl']);
+            Route::post('bind/dingTalk', [AdminController::class, 'dingTalk']);
+            Route::post('bind/dingTalkInfo', [AdminController::class, 'dingTalkInfo']);
+            Route::post('unbind/dingTalk', [AdminController::class, 'unbindDingTalk']);
+            Route::post('bind/wechatUrl', [AdminController::class, 'wechatUrl']);
+            Route::post('bind/wechat', [AdminController::class, 'wechat']);
+            Route::post('bind/wechatInfo', [AdminController::class, 'wechatInfo']);
+            Route::post('unbind/wechat', [AdminController::class, 'unbindWechat']);
             // 权限
             Route::post('permission/create', [PermissionController::class, 'create'])
                 ->middleware('permission:permission.create');
@@ -88,6 +110,7 @@ Route::middleware(['lang'])->prefix('admin')->name('admin.')->group(function () 
             Route::post('admins', [AdminController::class, 'admins'])->middleware('permission:admin.admins');
             Route::post('admin', [AdminController::class, 'admin'])->middleware('permission:admin.admin');
             Route::post('admin/select', [AdminController::class, 'select']);
+            Route::post('admin/setting', [AdminController::class, 'setting']);
             // 操作记录
             Route::post('active/logs', [ActiveLogController::class, 'logs'])
                 ->middleware('permission:activeLog.activeLogs');
@@ -142,6 +165,16 @@ Route::middleware(['lang'])->prefix('admin')->name('admin.')->group(function () 
             Route::post('genTable/delete', [GenTableController::class, 'delete'])->middleware('permission:genTable.genTables');
             Route::post('genTable/gen', [GenTableController::class, 'gen'])->middleware('permission:genTable.genTables');
             Route::post('genTable/download', [GenTableController::class, 'download'])->middleware('permission:genTable.genTables');
+
+            Route::post('system/logo', [SystemController::class, 'logo'])->middleware('permission:systemConfig');
+            Route::post('system/getConfig', [SystemController::class, 'getConfig'])->middleware('permission:systemConfig');
+            Route::post('system/aliOss', [SystemController::class, 'aliOss'])->middleware('permission:systemConfig');
+            Route::post('system/dingTalk', [SystemController::class, 'dingTalk'])->middleware('permission:systemConfig');
+            Route::post('system/wechat', [SystemController::class, 'wechat'])->middleware('permission:systemConfig');
+            Route::post('system/wechatPay', [SystemController::class, 'wechatPay'])->middleware('permission:systemConfig');
+            Route::post('system/wechatPayCheck', [SystemController::class, 'wechatPayCheck'])->middleware('permission:systemConfig');
+            Route::post('system/wechatPayTest', [SystemController::class, 'wechatPayTest'])->middleware('permission:systemConfig');
+            Route::post('system/randomKey', [SystemController::class, 'randomKey'])->middleware('permission:systemConfig');
         });
     });
 });
