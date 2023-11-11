@@ -32,9 +32,9 @@ use Illuminate\Support\Str;
  * @method static \Illuminate\Database\Eloquent\Builder|DatabaseNotification whereReadAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|DatabaseNotification whereType($value)
  * @method static \Illuminate\Database\Eloquent\Builder|DatabaseNotification whereUpdatedAt($value)
- * @mixin \Eloquent
  * @method static Builder|DatabaseNotification read()
  * @method static Builder|DatabaseNotification unread()
+ * @mixin \Eloquent
  */
 class DatabaseNotification extends DatabaseNotificationModel
 {

@@ -50,6 +50,8 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Permission whereSort($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Permission whereTitle($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Permission whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Permission withoutPermission($permissions)
+ * @method static \Illuminate\Database\Eloquent\Builder|Permission withoutRole($roles, $guard = null)
  * @mixin \Eloquent
  */
 class Permission extends \Spatie\Permission\Models\Permission
