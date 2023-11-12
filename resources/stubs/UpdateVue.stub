@@ -45,7 +45,7 @@ export default {
       {{singular}}Info({
         {{primaryId}}: {{primaryId}}
       }).then(response => {
-        this.form = response.data{{init}}
+        this.form = response.data{{init}}.item
         this.dialogVisible = true
       }).finally(_ => {
         loading.close()
