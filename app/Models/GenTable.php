@@ -222,7 +222,6 @@ class GenTable extends BaseModel
     }
 
     /**
-     * TODO 路径问题
      *
      * @param string $tableName
      * @param int $permissionId
