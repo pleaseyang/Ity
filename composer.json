@@ -27,7 +27,7 @@
         "spatie/laravel-permission": "^5.11.1",
         "wechatpay/wechatpay": "^1.4",
         "workerman/gateway-worker": "^3.0",
-        "workerman/workerman": "^4.1.6"
+        "workerman/workerman": "^4.1"
     },
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^2.13.0",
