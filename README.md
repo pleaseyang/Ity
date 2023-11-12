@@ -16,9 +16,6 @@
 
 [https://github.com/pleaseyang/ItyWeb](https://github.com/pleaseyang/ItyWeb)
 
-## API文档
-API文档 [https://docs.apipost.cn/view/27e22c203e0d4854](https://docs.apipost.cn/view/27e22c203e0d4854)
-
 ## 功能模块
 ### RBAC权限
 ![RBAC权限](.github/RBAC权限.png)
