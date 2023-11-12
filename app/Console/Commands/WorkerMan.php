@@ -117,6 +117,7 @@ class WorkerMan extends Command
      */
     private function startRegister()
     {
-        new Register('text://0.0.0.0:1236');
+        $register = new Register('text://0.0.0.0:1236');
+        $register->name = 'Register ' . config('app.name');
     }
 }
