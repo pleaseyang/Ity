@@ -64,7 +64,6 @@ use stdClass;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Admin wherePassword($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Admin whereRememberToken($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Admin whereUpdatedAt($value)
- * @mixin \Eloquent
  * @property int $status 状态 1:正常 2:禁止
  * @method static Builder|Admin whereStatus($value)
  * @property string $theme 主题色
@@ -77,6 +76,9 @@ use stdClass;
  * @method static Builder|Admin whereSupportPinyinSearch($value)
  * @method static Builder|Admin whereTagsView($value)
  * @method static Builder|Admin whereTheme($value)
+ * @method static Builder|Admin withoutPermission($permissions)
+ * @method static Builder|Admin withoutRole($roles, $guard = null)
+ * @mixin \Eloquent
  */
 class Admin extends Authenticatable implements JWTSubject
 {

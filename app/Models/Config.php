@@ -41,9 +41,9 @@ use ZipArchive;
  * @method static \Illuminate\Database\Eloquent\Builder|Config whereKey($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Config whereType($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Config whereValue($value)
- * @mixin \Eloquent
  * @property-read \Illuminate\Database\Eloquent\Collection|\Spatie\Activitylog\Models\Activity[] $activities
  * @property-read int|null $activities_count
+ * @mixin \Eloquent
  */
 class Config extends BaseModel
 {

@@ -26,3 +26,6 @@ _ide_helper_models.php
 composer.lock
 
 z_*.log
+
+.htaccess
+nginx.htaccess

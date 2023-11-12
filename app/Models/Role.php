@@ -30,6 +30,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Role whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Role whereName($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Role whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Role withoutPermission($permissions)
  * @mixin \Eloquent
  */
 class Role extends \Spatie\Permission\Models\Role

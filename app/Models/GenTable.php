@@ -222,6 +222,7 @@ class GenTable extends BaseModel
     }
 
     /**
+     *
      * @param string $tableName
      * @param int $permissionId
      * @param string|null $permissionName
